@@ -1,19 +1,32 @@
 /**
  * API client for CampusNest AI.
  *
- * Provides streaming search via SSE.
+ * Provides streaming search via SSE and authenticated requests.
  */
+
+import { supabase } from "../lib/supabase";
 
 const API_BASE = "/api";
 
 // ---------------------------------------------------------------------------
-// Streaming search via SSE
+// Authenticated fetch helper
 // ---------------------------------------------------------------------------
 
-export type StageEventHandler = (event: {
-  type: string;
-  data: Record<string, unknown>;
-}) => void;
+async function authFetch(
+  url: string,
+  options: RequestInit = {}
+): Promise<Response> {
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+
+  const headers = new Headers(options.headers);
+  if (session?.access_token) {
+    headers.set("Authorization", `Bearer ${session.access_token}`);
+  }
+
+  return fetch(url, { ...options, headers });
+}
 
 // ---------------------------------------------------------------------------
 // Listing parsing (landlord)
@@ -22,7 +35,7 @@ export type StageEventHandler = (event: {
 export async function parseListing(
   description: string
 ): Promise<unknown> {
-  const response = await fetch(`${API_BASE}/listing/parse`, {
+  const response = await authFetch(`${API_BASE}/listing/parse`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ description }),
@@ -39,6 +52,11 @@ export async function parseListing(
 // Streaming search via SSE
 // ---------------------------------------------------------------------------
 
+export type StageEventHandler = (event: {
+  type: string;
+  data: Record<string, unknown>;
+}) => void;
+
 export function searchAccommodationStream(
   query: string,
   onEvent: StageEventHandler,
@@ -50,7 +68,19 @@ export function searchAccommodationStream(
 
   (async () => {
     try {
-      const response = await fetch(url, { signal: abortController.signal });
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      const headers: Record<string, string> = {};
+      if (session?.access_token) {
+        headers["Authorization"] = `Bearer ${session.access_token}`;
+      }
+
+      const response = await fetch(url, {
+        signal: abortController.signal,
+        headers,
+      });
 
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}`);
@@ -103,4 +133,27 @@ export function searchAccommodationStream(
     closed = true;
     abortController.abort();
   };
+}
+
+// ---------------------------------------------------------------------------
+// Search history
+// ---------------------------------------------------------------------------
+
+export async function saveSearchHistory(
+  searchQuery: string,
+  structuredSearch: unknown,
+  recommendations: unknown
+): Promise<void> {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) return;
+
+  await supabase.from("search_history").insert({
+    user_id: user.id,
+    search_query: searchQuery,
+    structured_search: structuredSearch,
+    recommendations: recommendations,
+  });
 }

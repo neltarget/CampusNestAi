@@ -4,6 +4,35 @@
  * Types matching server responses and internal UI state.
  */
 
+// ---------------------------------------------------------------------------
+// Auth types
+// ---------------------------------------------------------------------------
+
+export type UserRole = "student" | "landlord";
+
+export interface UserProfile {
+  id: string;
+  full_name: string;
+  email: string;
+  role: UserRole;
+  avatar_url: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface SearchHistoryItem {
+  id: string;
+  user_id: string;
+  search_query: string;
+  structured_search: SearchCriteria | null;
+  recommendations: RankedListing[] | null;
+  created_at: string;
+}
+
+// ---------------------------------------------------------------------------
+// Search types
+// ---------------------------------------------------------------------------
+
 export interface SearchCriteria {
   university: string;
   budget: number | null;

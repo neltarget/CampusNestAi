@@ -1,0 +1,129 @@
+import { useState } from "react";
+import { useAuth } from "../contexts/AuthContext";
+
+export function ProfilePage() {
+  const { user, profile, updateProfile, refreshProfile } = useAuth();
+  const [fullName, setFullName] = useState(profile?.full_name ?? "");
+  const [role, setRole] = useState<"student" | "landlord">(profile?.role ?? "student");
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+    setError("");
+    setSaved(false);
+
+    const result = await updateProfile({ full_name: fullName, role });
+    setSaving(false);
+
+    if (result.error) {
+      setError(result.error);
+    } else {
+      setSaved(true);
+      await refreshProfile();
+      setTimeout(() => setSaved(false), 2000);
+    }
+  };
+
+  if (!user || !profile) {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-indigo-600 border-t-transparent" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="mx-auto max-w-lg px-4 py-10">
+      <h1 className="mb-2 text-2xl font-bold text-gray-900">Profile</h1>
+      <p className="mb-8 text-sm text-gray-500">Manage your account settings</p>
+
+      <div className="rounded-2xl border border-gray-100 bg-white p-8 shadow-lg shadow-gray-200/50">
+        <div className="mb-6 flex items-center gap-4">
+          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-indigo-100 text-lg font-bold text-indigo-600">
+            {profile.full_name?.charAt(0)?.toUpperCase() || profile.email.charAt(0).toUpperCase()}
+          </div>
+          <div>
+            <p className="font-semibold text-gray-900">{profile.full_name || "No name set"}</p>
+            <p className="text-sm text-gray-500">{profile.email}</p>
+          </div>
+        </div>
+
+        <div className="mb-6 rounded-lg bg-gray-50 px-4 py-3 text-sm text-gray-600">
+          <span className="font-medium">Role:</span>{" "}
+          <span className="capitalize">{profile.role}</span>
+          <span className="ml-3 text-gray-400">&middot;</span>
+          <span className="ml-3 text-gray-400">
+            Joined {new Date(profile.created_at).toLocaleDateString()}
+          </span>
+        </div>
+
+        {error && (
+          <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {error}
+          </div>
+        )}
+
+        {saved && (
+          <div className="mb-4 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
+            Profile updated successfully
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label htmlFor="fullName" className="mb-1 block text-sm font-medium text-gray-700">
+              Full Name
+            </label>
+            <input
+              id="fullName"
+              type="text"
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-900 placeholder:text-gray-400 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 focus:outline-none transition-all"
+              placeholder="Your name"
+            />
+          </div>
+
+          <div>
+            <label className="mb-1 block text-sm font-medium text-gray-700">Role</label>
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => setRole("student")}
+                className={`flex-1 rounded-xl border-2 px-4 py-3 text-sm font-medium transition-all ${
+                  role === "student"
+                    ? "border-indigo-600 bg-indigo-50 text-indigo-700"
+                    : "border-gray-200 text-gray-600 hover:border-gray-300"
+                }`}
+              >
+                Student
+              </button>
+              <button
+                type="button"
+                onClick={() => setRole("landlord")}
+                className={`flex-1 rounded-xl border-2 px-4 py-3 text-sm font-medium transition-all ${
+                  role === "landlord"
+                    ? "border-indigo-600 bg-indigo-50 text-indigo-700"
+                    : "border-gray-200 text-gray-600 hover:border-gray-300"
+                }`}
+              >
+                Landlord
+              </button>
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            disabled={saving}
+            className="w-full rounded-xl bg-indigo-600 px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+          >
+            {saving ? "Saving..." : "Save changes"}
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}

@@ -12,8 +12,16 @@ import {
 } from "../services/ai-orchestrator/index.js";
 import { loadPrompt } from "../prompts/prompt-loader.js";
 import getOpenAI from "../services/openai.js";
+import getClient from "../services/supabase.js";
+import {
+  authMiddleware,
+  type AuthenticatedRequest,
+} from "../middleware/auth.js";
 
 export const searchRouter = Router();
+
+// Apply auth middleware to all search routes (attaches user if token present)
+searchRouter.use(authMiddleware);
 
 /**
  * POST /api/search
@@ -34,6 +42,23 @@ searchRouter.post("/search", async (req, res) => {
     }
 
     const result = await executeSearch(query);
+
+    // Save search history for authenticated users
+    const authReq = req as AuthenticatedRequest;
+    if (authReq.user) {
+      try {
+        const supabase = getClient();
+        await supabase.from("search_history").insert({
+          user_id: authReq.user.id,
+          search_query: query,
+          structured_search: result.intent,
+          recommendations: result.listings,
+        });
+      } catch {
+        // Non-critical — don't fail the search if history save fails
+      }
+    }
+
     res.json(result);
   } catch (_error) {
     res.status(500).json({ error: "Internal server error" });
@@ -108,6 +133,22 @@ searchRouter.get("/search/stream", async (req, res) => {
       type: "search:done",
       data: result as unknown as Record<string, unknown>,
     });
+
+    // Save search history for authenticated users
+    const authReq = req as AuthenticatedRequest;
+    if (authReq.user) {
+      try {
+        const supabase = getClient();
+        await supabase.from("search_history").insert({
+          user_id: authReq.user.id,
+          search_query: query,
+          structured_search: result.intent,
+          recommendations: result.listings,
+        });
+      } catch {
+        // Non-critical
+      }
+    }
   } catch (error) {
     sendEvent({
       type: "search:done",
