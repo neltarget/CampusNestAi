@@ -5,6 +5,7 @@
  */
 
 import { supabase } from "../lib/supabase";
+import type { Listing } from "../types";
 
 const API_BASE = "/api";
 
@@ -133,6 +134,75 @@ export function searchAccommodationStream(
     closed = true;
     abortController.abort();
   };
+}
+
+// ---------------------------------------------------------------------------
+// All listings fetch
+// ---------------------------------------------------------------------------
+
+export async function getAllListings(): Promise<Listing[]> {
+  try {
+    const response = await authFetch(`${API_BASE}/listings`);
+    if (!response.ok) return [];
+    const data = (await response.json()) as { listings: Listing[] };
+    return data.listings ?? [];
+  } catch {
+    return [];
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Single listing fetch
+// ---------------------------------------------------------------------------
+
+export async function getListingById(id: string): Promise<{
+  listing: Record<string, unknown>;
+  reviews: Record<string, unknown>[];
+  verification: Record<string, unknown> | null;
+} | null> {
+  try {
+    const response = await authFetch(`${API_BASE}/listing/${id}`);
+    if (!response.ok) return null;
+    const data = (await response.json()) as {
+      listing: Record<string, unknown>;
+      reviews: Record<string, unknown>[];
+      verification: Record<string, unknown> | null;
+    };
+    return data;
+  } catch {
+    return null;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Create listing (landlord)
+// ---------------------------------------------------------------------------
+
+export async function createListing(listing: {
+  title: string;
+  description: string;
+  university: string;
+  location: string;
+  price: number;
+  distance: number;
+  wifi: boolean;
+  bathrooms: number;
+  kitchen: boolean;
+  gender: string;
+  noiseLevel: string;
+}): Promise<{ success: boolean; listingId?: string; error?: string }> {
+  const response = await authFetch(`${API_BASE}/listing`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(listing),
+  });
+
+  const data = (await response.json()) as {
+    success: boolean;
+    listingId?: string;
+    error?: string;
+  };
+  return data;
 }
 
 // ---------------------------------------------------------------------------

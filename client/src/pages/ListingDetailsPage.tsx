@@ -1,19 +1,104 @@
+import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { mockListings, mockReviews, mockVerifications } from "../data/mock";
 import { VerificationBadge } from "../components/VerificationBadge";
+import { getListingById } from "../services/api";
+import type { Listing, Review, VerificationRecord } from "../types";
 
 export function ListingDetailsPage() {
   const { id } = useParams<{ id: string }>();
-  const listing = mockListings.find((l) => l.id === id);
-  const reviews = mockReviews.filter((r) => r.listingId === id);
-  const verification = mockVerifications.find((v) => v.listingId === id);
+  const [listing, setListing] = useState<Listing | null>(null);
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [verification, setVerification] = useState<VerificationRecord | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
-  if (!listing) {
+  useEffect(() => {
+    if (!id) return;
+
+    let cancelled = false;
+
+    async function fetchListing() {
+      setLoading(true);
+      const data = await getListingById(id!);
+      if (cancelled) return;
+
+      if (!data) {
+        setError(true);
+        setLoading(false);
+        return;
+      }
+
+      const raw = data.listing;
+      setListing({
+        id: String(raw.id),
+        title: String(raw.title),
+        description: String(raw.description),
+        university: String(raw.university),
+        location: String(raw.location),
+        price: Number(raw.price),
+        distance: Number(raw.distance),
+        wifi: Boolean(raw.wifi),
+        bathrooms: Number(raw.bathrooms),
+        kitchen: Boolean(raw.kitchen),
+        gender: String(raw.gender),
+        noiseLevel: String(raw.noiseLevel),
+        images: Array.isArray(raw.images)
+          ? raw.images.map((i: unknown) => String(i)).filter(Boolean)
+          : raw.images
+            ? [String(raw.images)]
+            : [],
+        reviewScore:
+          typeof raw.reviewScore === "number" ? raw.reviewScore : null,
+        verificationScore:
+          typeof raw.verificationScore === "number"
+            ? raw.verificationScore
+            : null,
+        createdAt: String(raw.createdAt),
+      });
+
+      setReviews(
+        data.reviews.map((r) => ({
+          id: String(r.id),
+          listingId: String(r.listingId),
+          rating: Number(r.rating),
+          comment: String(r.comment),
+        }))
+      );
+
+      if (data.verification) {
+        setVerification({
+          id: String(data.verification.id),
+          listingId: String(data.verification.listingId),
+          verificationDate: String(data.verification.verificationDate),
+          confidence: Number(data.verification.confidence),
+          notes: String(data.verification.notes),
+        });
+      }
+
+      setLoading(false);
+    }
+
+    fetchListing();
+    return () => {
+      cancelled = true;
+    };
+  }, [id]);
+
+  if (loading) {
     return (
       <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 text-center">
-        <h2 className="text-2xl font-bold text-gray-900">
-          Listing not found
-        </h2>
+        <div className="inline-flex items-center gap-3">
+          <div className="h-5 w-5 rounded-full border-2 border-indigo-600 border-t-transparent animate-spin" />
+          <span className="text-sm text-gray-500">Loading listing...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !listing) {
+    return (
+      <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 text-center">
+        <h2 className="text-2xl font-bold text-gray-900">Listing not found</h2>
         <p className="mt-2 text-gray-500">
           The listing you are looking for does not exist or has been removed.
         </p>
@@ -70,7 +155,10 @@ export function ListingDetailsPage() {
           {/* Image */}
           <div className="overflow-hidden rounded-xl bg-gray-100">
             <img
-              src={listing.images[0] || "https://picsum.photos/seed/placeholder/800/600"}
+              src={
+                listing.images[0] ||
+                "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?w=800&h=600&fit=crop"
+              }
               alt={listing.title}
               className="h-80 w-full object-cover"
             />
@@ -336,7 +424,9 @@ export function ListingDetailsPage() {
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-gray-500">Last verified</span>
                   <span className="font-medium text-gray-900">
-                    {new Date(verification.verificationDate).toLocaleDateString()}
+                    {new Date(
+                      verification.verificationDate
+                    ).toLocaleDateString()}
                   </span>
                 </div>
               </div>

@@ -1,12 +1,16 @@
 import { useState } from "react";
-import { parseListing } from "../services/api";
+import { useNavigate } from "react-router-dom";
+import { parseListing, createListing } from "../services/api";
 import type { ParsedListing } from "../types";
 
 export function ListingWorkerPage() {
+  const navigate = useNavigate();
   const [description, setDescription] = useState("");
   const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [result, setResult] = useState<ParsedListing | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
 
   const handleParse = async () => {
     if (!description.trim()) return;
@@ -14,6 +18,7 @@ export function ListingWorkerPage() {
     setLoading(true);
     setError(null);
     setResult(null);
+    setSuccess(false);
 
     try {
       const response = (await parseListing(description)) as {
@@ -32,6 +37,47 @@ export function ListingWorkerPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleCreate = async () => {
+    if (!result) return;
+
+    setSaving(true);
+    setError(null);
+
+    try {
+      const response = await createListing({
+        title: result.title,
+        description: result.description,
+        university: result.university,
+        location: result.location,
+        price: result.price,
+        distance: result.distance,
+        wifi: result.wifi,
+        bathrooms: result.bathrooms,
+        kitchen: result.kitchen,
+        gender: result.gender,
+        noiseLevel: result.noiseLevel,
+      });
+
+      if (response.success && response.listingId) {
+        setSuccess(true);
+        setTimeout(() => navigate(`/listing/${response.listingId}`), 1500);
+      } else {
+        setError(response.error ?? "Failed to create listing");
+      }
+    } catch {
+      setError("Failed to connect to server");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleReset = () => {
+    setDescription("");
+    setResult(null);
+    setError(null);
+    setSuccess(false);
   };
 
   return (
@@ -60,35 +106,45 @@ export function ListingWorkerPage() {
           className="mt-2 block w-full rounded-lg border border-gray-200 px-4 py-3 text-sm text-gray-900 placeholder:text-gray-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none resize-none"
         />
 
-        <button
-          onClick={handleParse}
-          disabled={!description.trim() || loading}
-          className="mt-4 inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-        >
-          {loading ? (
-            <>
-              <div className="h-4 w-4 rounded-full border-2 border-white border-t-transparent animate-spin" />
-              Parsing...
-            </>
-          ) : (
-            <>
-              <svg
-                className="h-4 w-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={2}
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z"
-                />
-              </svg>
-              Parse with AI
-            </>
+        <div className="mt-4 flex gap-2">
+          <button
+            onClick={handleParse}
+            disabled={!description.trim() || loading}
+            className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+          >
+            {loading ? (
+              <>
+                <div className="h-4 w-4 rounded-full border-2 border-white border-t-transparent animate-spin" />
+                Parsing...
+              </>
+            ) : (
+              <>
+                <svg
+                  className="h-4 w-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={2}
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z"
+                  />
+                </svg>
+                Parse with AI
+              </>
+            )}
+          </button>
+          {result && (
+            <button
+              onClick={handleReset}
+              className="rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+            >
+              Reset
+            </button>
           )}
-        </button>
+        </div>
       </div>
 
       {error && (
@@ -115,9 +171,32 @@ export function ListingWorkerPage() {
         </div>
       )}
 
+      {success && (
+        <div className="mt-6 rounded-xl border border-green-200 bg-green-50 p-5">
+          <div className="flex items-center gap-3">
+            <svg
+              className="h-5 w-5 text-green-500"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={2}
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+              />
+            </svg>
+            <span className="text-sm font-medium text-green-800">
+              Listing created! Redirecting...
+            </span>
+          </div>
+        </div>
+      )}
+
       {result && (
-        <div className="mt-6 rounded-xl border border-green-200 bg-green-50 p-6">
-          <h3 className="text-sm font-semibold text-green-800 mb-4">
+        <div className="mt-6 rounded-xl border border-gray-200 bg-white p-6">
+          <h3 className="text-sm font-semibold text-gray-900 mb-4">
             Parsed Listing
           </h3>
 
@@ -193,15 +272,35 @@ export function ListingWorkerPage() {
             <p className="mt-1 text-sm text-gray-900">{result.description}</p>
           </div>
 
-          <div className="mt-4 flex gap-2">
-            <button className="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-500 transition-colors">
-              Create Listing
-            </button>
+          <div className="mt-6">
             <button
-              onClick={() => setResult(null)}
-              className="rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+              onClick={handleCreate}
+              disabled={saving}
+              className="inline-flex items-center gap-2 rounded-lg bg-green-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-green-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
             >
-              Reset
+              {saving ? (
+                <>
+                  <div className="h-4 w-4 rounded-full border-2 border-white border-t-transparent animate-spin" />
+                  Creating...
+                </>
+              ) : (
+                <>
+                  <svg
+                    className="h-4 w-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={2}
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M12 4.5v15m7.5-7.5h-15"
+                    />
+                  </svg>
+                  Create Listing
+                </>
+              )}
             </button>
           </div>
         </div>

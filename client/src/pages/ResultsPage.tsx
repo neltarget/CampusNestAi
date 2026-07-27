@@ -1,21 +1,39 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ListingCard } from "../components/ListingCard";
-import { mockListings } from "../data/mock";
-
-const locations = [...new Set(mockListings.map((l) => l.location))];
-const priceRanges = [
-  { label: "Under GHS 2,000", min: 0, max: 2000 },
-  { label: "GHS 2,000 - 4,000", min: 2000, max: 4000 },
-  { label: "GHS 4,000 - 6,000", min: 4000, max: 6000 },
-  { label: "Over GHS 6,000", min: 6000, max: Infinity },
-];
+import { getAllListings } from "../services/api";
+import type { Listing } from "../types";
 
 export function ResultsPage() {
+  const [allListings, setAllListings] = useState<Listing[]>([]);
+  const [loading, setLoading] = useState(true);
   const [selectedLocation, setSelectedLocation] = useState<string>("all");
   const [selectedPriceRange, setSelectedPriceRange] = useState<string>("all");
   const [wifiOnly, setWifiOnly] = useState(false);
 
-  const filteredListings = mockListings.filter((listing) => {
+  useEffect(() => {
+    let cancelled = false;
+    async function fetch() {
+      const listings = await getAllListings();
+      if (!cancelled) {
+        setAllListings(listings);
+        setLoading(false);
+      }
+    }
+    fetch();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const locations = [...new Set(allListings.map((l) => l.location))];
+  const priceRanges = [
+    { label: "Under GHS 4,000", min: 0, max: 4000 },
+    { label: "GHS 4,000 - 6,000", min: 4000, max: 6000 },
+    { label: "GHS 6,000 - 8,000", min: 6000, max: 8000 },
+    { label: "Over GHS 8,000", min: 8000, max: Infinity },
+  ];
+
+  const filteredListings = allListings.filter((listing) => {
     if (selectedLocation !== "all" && listing.location !== selectedLocation) {
       return false;
     }
@@ -103,11 +121,20 @@ export function ResultsPage() {
               All Listings
             </h2>
             <span className="text-sm text-gray-500">
-              {filteredListings.length} results
+              {loading ? "Loading..." : `${filteredListings.length} results`}
             </span>
           </div>
 
-          {filteredListings.length === 0 ? (
+          {loading ? (
+            <div className="rounded-xl border border-gray-200 bg-white p-12 text-center">
+              <div className="inline-flex items-center gap-3">
+                <div className="h-5 w-5 rounded-full border-2 border-indigo-600 border-t-transparent animate-spin" />
+                <span className="text-sm text-gray-500">
+                  Loading listings...
+                </span>
+              </div>
+            </div>
+          ) : filteredListings.length === 0 ? (
             <div className="rounded-xl border border-gray-200 bg-white p-12 text-center">
               <svg
                 className="mx-auto h-12 w-12 text-gray-400"
