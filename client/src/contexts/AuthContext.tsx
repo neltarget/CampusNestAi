@@ -29,32 +29,60 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+/**
+ * Ensure a profile exists for the user.
+ * If the trigger didn't create one (or Google metadata was missing), create it now.
+ */
+async function ensureProfile(user: User): Promise<UserProfile | null> {
+  // Try fetching existing profile
+  const { data: existing } = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("id", user.id)
+    .single();
+
+  if (existing) return existing as UserProfile;
+
+  // Profile doesn't exist — create it from user metadata
+  const fullName =
+    user.user_metadata?.full_name ||
+    user.user_metadata?.name ||
+    "";
+  const email = user.email ?? "";
+
+  const { data: created, error } = await supabase
+    .from("profiles")
+    .upsert(
+      {
+        id: user.id,
+        full_name: fullName,
+        email,
+        role: "student",
+      },
+      { onConflict: "id" }
+    )
+    .select()
+    .single();
+
+  if (error || !created) {
+    console.warn("[Auth] Could not create profile:", error?.message);
+    return null;
+  }
+
+  return created as UserProfile;
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchProfile = useCallback(async (userId: string) => {
-    const { data, error } = await supabase
-      .from("profiles")
-      .select("*")
-      .eq("id", userId)
-      .single();
-
-    if (error || !data) {
-      console.warn("[Auth] Could not fetch profile:", error?.message);
-      return null;
-    }
-
-    return data as UserProfile;
-  }, []);
-
   const refreshProfile = useCallback(async () => {
     if (!user) return;
-    const p = await fetchProfile(user.id);
+    const p = await ensureProfile(user);
     setProfile(p);
-  }, [user, fetchProfile]);
+  }, [user]);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
@@ -62,7 +90,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(currentSession?.user ?? null);
 
       if (currentSession?.user) {
-        fetchProfile(currentSession.user.id).then((p) => {
+        ensureProfile(currentSession.user).then((p) => {
           setProfile(p);
           setLoading(false);
         });
@@ -78,7 +106,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(currentSession?.user ?? null);
 
       if (currentSession?.user) {
-        const p = await fetchProfile(currentSession.user.id);
+        const p = await ensureProfile(currentSession.user);
         setProfile(p);
       } else {
         setProfile(null);
@@ -86,7 +114,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
 
     return () => subscription.unsubscribe();
-  }, [fetchProfile]);
+  }, []);
 
   const signUp = useCallback(
     async (email: string, password: string, fullName: string) => {
@@ -119,6 +147,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       provider: "google",
       options: {
         redirectTo: `${window.location.origin}/`,
+        queryParams: {
+          prompt: "select_account",
+        },
       },
     });
 

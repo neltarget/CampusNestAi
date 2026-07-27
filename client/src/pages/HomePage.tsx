@@ -1,5 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { SearchBox } from "../components/SearchBox";
+import { useAuth } from "../contexts/AuthContext";
+import { getTimeGreeting, getFirstName } from "../lib/auth-helpers";
 
 const features = [
   {
@@ -26,10 +28,14 @@ const features = [
 
 export function HomePage() {
   const navigate = useNavigate();
+  const { user, profile } = useAuth();
 
   const handleSearch = (query: string) => {
     navigate(`/search?q=${encodeURIComponent(query)}`);
   };
+
+  const greeting = user ? `${getTimeGreeting()}, ${getFirstName(user)}` : null;
+  const displayName = profile?.full_name || (user ? getFirstName(user) : null);
 
   return (
     <div className="min-h-[calc(100vh-4rem)]">
@@ -37,13 +43,22 @@ export function HomePage() {
       <section className="relative overflow-hidden bg-gradient-to-b from-indigo-50 via-white to-white px-4 py-20 sm:px-6 lg:px-8">
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMS41IiBmaWxsPSIjZTBlN2ZmIi8+PC9zdmc+')] opacity-40" />
         <div className="relative mx-auto max-w-3xl text-center">
+          {greeting && (
+            <p className="mb-4 text-lg font-medium text-indigo-600">
+              {greeting}
+            </p>
+          )}
           <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl lg:text-6xl">
-            Find your perfect
-            <span className="text-indigo-600"> student home</span>
+            {displayName
+              ? <>Find your perfect<span className="text-indigo-600"> student home</span></>
+              : <>Find your perfect<span className="text-indigo-600"> student home</span></>
+            }
           </h1>
           <p className="mt-6 text-lg text-gray-600 sm:text-xl">
-            Describe what you need in natural language. Our AI orchestrator
-            reasons through your request to find the best accommodation.
+            {displayName
+              ? `Welcome back, ${displayName.split(" ")[0]}. Describe what you need and our AI will find the best options.`
+              : "Describe what you need in natural language. Our AI orchestrator reasons through your request to find the best accommodation."
+            }
           </p>
 
           <div className="mt-10">
