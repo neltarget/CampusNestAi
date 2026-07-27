@@ -1,13 +1,21 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
 
 export function ProfilePage() {
-  const { user, profile, updateProfile, refreshProfile } = useAuth();
-  const [fullName, setFullName] = useState(profile?.full_name ?? "");
-  const [role, setRole] = useState<"student" | "landlord">(profile?.role ?? "student");
+  const { user, profile, updateProfile, refreshProfile, loading: authLoading } = useAuth();
+  const [fullName, setFullName] = useState("");
+  const [role, setRole] = useState<"student" | "landlord">("student");
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState("");
+
+  // Sync form state with profile when it loads
+  useEffect(() => {
+    if (profile) {
+      setFullName(profile.full_name);
+      setRole(profile.role);
+    }
+  }, [profile]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,10 +35,30 @@ export function ProfilePage() {
     }
   };
 
-  if (!user || !profile) {
+  if (authLoading) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-indigo-600 border-t-transparent" />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <p className="text-gray-500">Please sign in to view your profile.</p>
+      </div>
+    );
+  }
+
+  // Profile is still loading/creating
+  if (!profile) {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <div className="text-center">
+          <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-4 border-indigo-600 border-t-transparent" />
+          <p className="text-sm text-gray-500">Loading profile...</p>
+        </div>
       </div>
     );
   }

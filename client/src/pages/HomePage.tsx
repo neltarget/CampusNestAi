@@ -10,8 +10,8 @@ const features = [
     icon: "M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 0 1 .865-.501 48.172 48.172 0 0 0 3.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z",
   },
   {
-    title: "AI Orchestrator",
-    description: "A single AI orchestrator reasons through your request using structured thinking.",
+    title: "Multi-Stage AI Agent",
+    description: "Our AI agent thoroughly matches your interests with the best available accommodations through multiple intelligent stages.",
     icon: "M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z",
   },
   {
@@ -49,15 +49,13 @@ export function HomePage() {
             </p>
           )}
           <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl lg:text-6xl">
-            {displayName
-              ? <>Find your perfect<span className="text-indigo-600"> student home</span></>
-              : <>Find your perfect<span className="text-indigo-600"> student home</span></>
-            }
+            Find your perfect
+            <span className="text-indigo-600"> student home</span>
           </h1>
           <p className="mt-6 text-lg text-gray-600 sm:text-xl">
             {displayName
-              ? `Welcome back, ${displayName.split(" ")[0]}. Describe what you need and our AI will find the best options.`
-              : "Describe what you need in natural language. Our AI orchestrator reasons through your request to find the best accommodation."
+              ? `Welcome back, ${displayName.split(" ")[0]}. Describe what you need and our multi-stage AI agent will find the best options for you.`
+              : "Describe what you need in natural language. Our multi-stage AI agent thoroughly matches your interests with the best available accommodations."
             }
           </p>
 
@@ -74,7 +72,7 @@ export function HomePage() {
             How it works
           </h2>
           <p className="mt-2 text-center text-gray-500">
-            The AI orchestrator reasons through each step to find your ideal accommodation
+            Our multi-stage AI agent processes your request through intelligent stages to find your ideal accommodation
           </p>
 
           <div className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
@@ -114,10 +112,10 @@ export function HomePage() {
       <section className="bg-gray-50 px-4 py-16 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-3xl">
           <h2 className="text-center text-2xl font-bold text-gray-900">
-            The AI Pipeline
+            The Multi-Stage Agent Pipeline
           </h2>
           <p className="mt-2 text-center text-gray-500">
-            Your request flows through intelligent processing stages
+            Your request flows through intelligent processing stages for thorough matching
           </p>
 
           <div className="mt-10 flex flex-col items-center gap-2">

@@ -18,7 +18,7 @@ app.use("/api", searchRouter);
 app.get("/health", async (_req, res) => {
   res.json({
     status: "ok",
-    architecture: "single-ai-orchestrator",
+    architecture: "multi-stage-agent",
     timestamp: new Date().toISOString(),
   });
 });
