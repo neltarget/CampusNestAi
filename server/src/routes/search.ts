@@ -12,7 +12,7 @@ import {
 } from "../services/ai-orchestrator/index.js";
 import { loadPrompt } from "../prompts/prompt-loader.js";
 import getOpenAI from "../services/openai.js";
-import getClient from "../services/supabase.js";
+import getClient, { getClientWithToken } from "../services/supabase.js";
 import {
   authMiddleware,
   type AuthenticatedRequest,
@@ -47,7 +47,8 @@ searchRouter.post("/search", async (req, res) => {
     const authReq = req as AuthenticatedRequest;
     if (authReq.user) {
       try {
-        const supabase = getClient();
+        const token = authReq.headers.authorization?.slice(7);
+        const supabase = token ? getClientWithToken(token) : getClient();
         await supabase.from("search_history").insert({
           user_id: authReq.user.id,
           search_query: query,
@@ -138,7 +139,8 @@ searchRouter.get("/search/stream", async (req, res) => {
     const authReq = req as AuthenticatedRequest;
     if (authReq.user) {
       try {
-        const supabase = getClient();
+        const token = authReq.headers.authorization?.slice(7);
+        const supabase = token ? getClientWithToken(token) : getClient();
         await supabase.from("search_history").insert({
           user_id: authReq.user.id,
           search_query: query,

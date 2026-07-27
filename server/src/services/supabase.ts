@@ -38,7 +38,20 @@ function getClient(): SupabaseClient {
   return supabase;
 }
 
-export { getClient as default };
+/**
+ * Get a Supabase client scoped to a user's JWT.
+ * This ensures RLS policies that check auth.uid() work correctly.
+ */
+function getClientWithToken(token: string): SupabaseClient {
+  if (!supabaseUrl || !supabaseKey) {
+    throw new Error("Supabase not configured");
+  }
+  return createClient(supabaseUrl, supabaseKey, {
+    global: { headers: { Authorization: `Bearer ${token}` } },
+  });
+}
+
+export { getClient as default, getClientWithToken };
 
 /**
  * Helper to query Supabase with type safety.
