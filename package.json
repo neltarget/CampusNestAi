@@ -1,0 +1,21 @@
+{
+  "name": "campusnest-ai",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": ["client", "server"],
+  "scripts": {
+    "dev:client": "yarn workspace client dev",
+    "dev:server": "yarn workspace server dev",
+    "dev": "concurrently \"yarn dev:server\" \"yarn dev:client\"",
+    "build": "yarn workspace client build && yarn workspace server build",
+    "start": "node server/dist/index.js",
+    "lint": "yarn workspace client lint && yarn workspace server lint",
+    "typecheck": "yarn workspace client typecheck && yarn workspace server typecheck",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,css,md}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,css,md}\""
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2",
+    "prettier": "^3.4.2"
+  }
+}
