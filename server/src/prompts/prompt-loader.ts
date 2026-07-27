@@ -6,9 +6,12 @@
  */
 
 import { readFileSync } from "node:fs";
-import { join } from "node:path";
+import { join, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
 
-const TEMPLATES_DIR = join(import.meta.dirname ?? ".", "templates");
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const TEMPLATES_DIR = join(__dirname, "templates");
 
 // Cache loaded templates in memory (prompts don't change at runtime)
 const templateCache = new Map<string, string>();
