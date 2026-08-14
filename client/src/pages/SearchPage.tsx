@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
+import { AlertCircle } from "lucide-react";
 import { SearchBox } from "../components/SearchBox";
 import { StageTimeline } from "../components/StageTimeline";
 import { StageOutputPanel } from "../components/StageOutputPanel";
@@ -129,7 +130,9 @@ export function SearchPage() {
       },
       (err) => {
         console.error("SSE error:", err);
-        setError("Failed to connect to search service. Make sure the server is running.");
+        setError(
+          "Failed to connect to search service. Make sure the server is running."
+        );
         setPhase("idle");
         searchingRef.current = false;
       }
@@ -147,10 +150,14 @@ export function SearchPage() {
     startSearch(query);
   };
 
-  const getExplanationForListing = (listingId: string): Explanation | undefined =>
+  const getExplanationForListing = (
+    listingId: string
+  ): Explanation | undefined =>
     result?.explanations.find((e) => e.listingId === listingId);
 
-  const getVerificationForListing = (listingId: string): VerificationResult | undefined =>
+  const getVerificationForListing = (
+    listingId: string
+  ): VerificationResult | undefined =>
     result?.verifications.find((v) => v.listingId === listingId);
 
   return (
@@ -165,13 +172,13 @@ export function SearchPage() {
 
       {error && (
         <div className="mx-auto mt-6 max-w-3xl">
-          <div className="rounded-lg border border-red-200 bg-red-50 p-4">
+          <div className="rounded-2xl border border-red-200 bg-red-50 p-4 shadow-elevated">
             <div className="flex items-start gap-3">
-              <svg className="h-5 w-5 text-red-400 mt-0.5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
-              </svg>
+              <AlertCircle className="h-5 w-5 text-red-400 mt-0.5 shrink-0" />
               <div>
-                <p className="text-sm font-medium text-red-800">Search failed</p>
+                <p className="text-sm font-medium text-red-800">
+                  Search failed
+                </p>
                 <p className="mt-1 text-sm text-red-600">{error}</p>
               </div>
             </div>
@@ -184,9 +191,9 @@ export function SearchPage() {
           <div className="mb-6">
             <div className="flex items-center gap-3">
               <div className="relative">
-                <div className="h-3 w-3 rounded-full bg-indigo-500 animate-pulse" />
+                <div className="h-3 w-3 rounded-full bg-emerald-500 animate-pulse" />
               </div>
-              <span className="text-sm font-medium text-indigo-600">
+              <span className="text-sm font-medium text-emerald-600">
                 AI is analyzing your request...
               </span>
             </div>
@@ -194,10 +201,18 @@ export function SearchPage() {
 
           <div className="grid gap-8 lg:grid-cols-3">
             <div className="lg:col-span-1">
-              <StageTimeline stages={stages} onSelect={setSelectedStage} selectedStage={selectedStage} />
+              <StageTimeline
+                stages={stages}
+                onSelect={setSelectedStage}
+                selectedStage={selectedStage}
+              />
             </div>
             <div className="lg:col-span-2">
-              <StageOutputPanel stages={stages} selectedStage={selectedStage} onSelect={setSelectedStage} />
+              <StageOutputPanel
+                stages={stages}
+                selectedStage={selectedStage}
+                onSelect={setSelectedStage}
+              />
             </div>
           </div>
         </div>
@@ -215,7 +230,7 @@ export function SearchPage() {
           <div className="mt-8 grid gap-8 lg:grid-cols-3">
             <div className="lg:col-span-2">
               <div className="mb-4 flex items-center justify-between">
-                <h2 className="text-lg font-semibold text-gray-900">
+                <h2 className="font-display text-lg font-semibold text-gray-900">
                   Top Recommendations
                 </h2>
                 <span className="text-sm text-gray-500">
@@ -224,14 +239,20 @@ export function SearchPage() {
               </div>
               <div className="space-y-4">
                 {result.listings.map((rank, index) => {
-                  const explanation = getExplanationForListing(rank.listing.id);
-                  const verification = getVerificationForListing(rank.listing.id);
+                  const explanation = getExplanationForListing(
+                    rank.listing.id
+                  );
+                  const verification = getVerificationForListing(
+                    rank.listing.id
+                  );
                   return (
                     <RecommendationCard
                       key={rank.listing.id}
                       listing={rank.listing}
                       rank={index + 1}
-                      explanation={explanation?.summary ?? "No explanation available"}
+                      explanation={
+                        explanation?.summary ?? "No explanation available"
+                      }
                       score={rank.score}
                       tradeoffs={explanation?.tradeoffs ?? []}
                       verification={verification}

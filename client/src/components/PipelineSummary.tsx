@@ -1,3 +1,4 @@
+import { Check, X, ArrowRight, Clock, Building2, AlertCircle } from "lucide-react";
 import type { OrchestratorStage } from "../types";
 
 interface PipelineSummaryProps {
@@ -29,10 +30,10 @@ export function PipelineSummary({
   ).length;
 
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+    <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-soft">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-sm font-semibold text-gray-900">
+          <h3 className="text-sm font-semibold font-display text-gray-900">
             AI Processing Complete
           </h3>
           <p className="mt-1 text-xs text-gray-500">
@@ -41,11 +42,17 @@ export function PipelineSummary({
         </div>
         <div className="flex items-center gap-4">
           <div className="text-right">
-            <p className="text-xs text-gray-500">Duration</p>
+            <div className="flex items-center gap-1 text-xs text-gray-500 justify-end">
+              <Clock className="h-3 w-3" />
+              Duration
+            </div>
             <p className="text-sm font-semibold text-gray-900">{duration}ms</p>
           </div>
           <div className="text-right">
-            <p className="text-xs text-gray-500">Results</p>
+            <div className="flex items-center gap-1 text-xs text-gray-500 justify-end">
+              <Building2 className="h-3 w-3" />
+              Results
+            </div>
             <p className="text-sm font-semibold text-gray-900">
               {totalListings} listings
             </p>
@@ -53,7 +60,7 @@ export function PipelineSummary({
         </div>
       </div>
 
-      <div className="mt-4 flex items-center gap-2">
+      <div className="mt-4 flex items-center gap-2 flex-wrap">
         {stages
           .filter(
             (s) => s.status === "completed" || s.status === "failed"
@@ -70,40 +77,16 @@ export function PipelineSummary({
             return (
               <div key={`${stage.name}`} className="flex items-center gap-2">
                 <div
-                  className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium ${
+                  className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium transition-colors duration-200 ${
                     stage.status === "completed"
                       ? "bg-green-100 text-green-700"
                       : "bg-red-100 text-red-700"
                   }`}
                 >
                   {stage.status === "completed" ? (
-                    <svg
-                      className="h-3 w-3"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth={2}
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="m4.5 12.75 6 6 9-13.5"
-                      />
-                    </svg>
+                    <Check className="h-3 w-3" />
                   ) : (
-                    <svg
-                      className="h-3 w-3"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth={2}
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M6 18 18 6M6 6l12 12"
-                      />
-                    </svg>
+                    <X className="h-3 w-3" />
                   )}
                   {name}
                   {stage.duration !== undefined && (
@@ -113,19 +96,7 @@ export function PipelineSummary({
                   )}
                 </div>
                 {!isLast && (
-                  <svg
-                    className="h-4 w-4 text-gray-300 shrink-0"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth={2}
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"
-                    />
-                  </svg>
+                  <ArrowRight className="h-4 w-4 text-gray-300 shrink-0" />
                 )}
               </div>
             );
@@ -133,17 +104,20 @@ export function PipelineSummary({
       </div>
 
       {failedStages > 0 && (
-        <div className="mt-3 rounded-lg bg-red-50 p-3">
-          <p className="text-xs text-red-700">
-            {failedStages} stage(s) failed. Results may be incomplete.
-          </p>
+        <div className="mt-3 rounded-xl bg-red-50 p-3">
+          <div className="flex items-center gap-2">
+            <AlertCircle className="h-4 w-4 text-red-500 shrink-0" />
+            <p className="text-xs text-red-700">
+              {failedStages} stage(s) failed. Results may be incomplete.
+            </p>
+          </div>
         </div>
       )}
 
       {explanation && (
-        <div className="mt-4 rounded-lg bg-indigo-50 p-3">
-          <p className="text-xs font-medium text-indigo-800 mb-1">AI Summary</p>
-          <p className="text-sm text-indigo-700">{explanation}</p>
+        <div className="mt-4 rounded-xl bg-emerald-50 p-3">
+          <p className="text-xs font-medium text-emerald-800 mb-1">AI Summary</p>
+          <p className="text-sm text-emerald-700">{explanation}</p>
         </div>
       )}
     </div>

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Search, SlidersHorizontal } from "lucide-react";
 import { ListingCard } from "../components/ListingCard";
 import { getAllListings } from "../services/api";
 import type { Listing } from "../types";
@@ -55,69 +56,82 @@ export function ResultsPage() {
         {/* Filters Sidebar */}
         <aside className="w-full shrink-0 lg:w-64">
           <div className="sticky top-24 space-y-6">
-            <div>
-              <h3 className="text-sm font-semibold text-gray-900">Location</h3>
-              <select
-                value={selectedLocation}
-                onChange={(e) => setSelectedLocation(e.target.value)}
-                className="mt-2 block w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
-              >
-                <option value="all">All Locations</option>
-                {locations.map((loc) => (
-                  <option key={loc} value={loc}>
-                    {loc}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-elevated">
+              <div className="mb-4 flex items-center gap-2">
+                <SlidersHorizontal className="h-4 w-4 text-emerald-600" />
+                <h3 className="font-display text-sm font-semibold text-gray-900">
+                  Filters
+                </h3>
+              </div>
 
-            <div>
-              <h3 className="text-sm font-semibold text-gray-900">
-                Price Range
-              </h3>
-              <select
-                value={selectedPriceRange}
-                onChange={(e) => setSelectedPriceRange(e.target.value)}
-                className="mt-2 block w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
-              >
-                <option value="all">Any Price</option>
-                {priceRanges.map((range) => (
-                  <option key={range.label} value={range.label}>
-                    {range.label}
-                  </option>
-                ))}
-              </select>
-            </div>
+              <div className="space-y-4">
+                <div>
+                  <label className="text-xs font-medium text-gray-500">
+                    Location
+                  </label>
+                  <select
+                    value={selectedLocation}
+                    onChange={(e) => setSelectedLocation(e.target.value)}
+                    className="mt-1 block w-full rounded-xl border border-gray-200 bg-gray-50/50 px-3 py-2 text-sm text-gray-900 focus:bg-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none transition-all duration-200"
+                  >
+                    <option value="all">All Locations</option>
+                    {locations.map((loc) => (
+                      <option key={loc} value={loc}>
+                        {loc}
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
-            <div>
-              <label className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={wifiOnly}
-                  onChange={(e) => setWifiOnly(e.target.checked)}
-                  className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                />
-                <span className="text-sm text-gray-700">WiFi required</span>
-              </label>
-            </div>
+                <div>
+                  <label className="text-xs font-medium text-gray-500">
+                    Price Range
+                  </label>
+                  <select
+                    value={selectedPriceRange}
+                    onChange={(e) => setSelectedPriceRange(e.target.value)}
+                    className="mt-1 block w-full rounded-xl border border-gray-200 bg-gray-50/50 px-3 py-2 text-sm text-gray-900 focus:bg-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none transition-all duration-200"
+                  >
+                    <option value="all">Any Price</option>
+                    {priceRanges.map((range) => (
+                      <option key={range.label} value={range.label}>
+                        {range.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
-            <button
-              onClick={() => {
-                setSelectedLocation("all");
-                setSelectedPriceRange("all");
-                setWifiOnly(false);
-              }}
-              className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
-            >
-              Clear Filters
-            </button>
+                <div>
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={wifiOnly}
+                      onChange={(e) => setWifiOnly(e.target.checked)}
+                      className="h-4 w-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
+                    />
+                    <span className="text-sm text-gray-700">WiFi required</span>
+                  </label>
+                </div>
+
+                <button
+                  onClick={() => {
+                    setSelectedLocation("all");
+                    setSelectedPriceRange("all");
+                    setWifiOnly(false);
+                  }}
+                  className="w-full rounded-xl border border-gray-200 bg-gray-50/50 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 transition-all duration-200"
+                >
+                  Clear Filters
+                </button>
+              </div>
+            </div>
           </div>
         </aside>
 
         {/* Listings Grid */}
         <div className="flex-1">
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-gray-900">
+            <h2 className="font-display text-lg font-semibold text-gray-900">
               All Listings
             </h2>
             <span className="text-sm text-gray-500">
@@ -126,30 +140,18 @@ export function ResultsPage() {
           </div>
 
           {loading ? (
-            <div className="rounded-xl border border-gray-200 bg-white p-12 text-center">
+            <div className="rounded-2xl border border-gray-100 bg-white p-12 text-center shadow-elevated">
               <div className="inline-flex items-center gap-3">
-                <div className="h-5 w-5 rounded-full border-2 border-indigo-600 border-t-transparent animate-spin" />
+                <div className="h-5 w-5 rounded-full border-2 border-emerald-600 border-t-transparent animate-spin" />
                 <span className="text-sm text-gray-500">
                   Loading listings...
                 </span>
               </div>
             </div>
           ) : filteredListings.length === 0 ? (
-            <div className="rounded-xl border border-gray-200 bg-white p-12 text-center">
-              <svg
-                className="mx-auto h-12 w-12 text-gray-400"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={1}
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
-                />
-              </svg>
-              <h3 className="mt-4 text-sm font-semibold text-gray-900">
+            <div className="rounded-2xl border border-gray-100 bg-white p-12 text-center shadow-elevated">
+              <Search className="mx-auto h-12 w-12 text-gray-400" />
+              <h3 className="font-display mt-4 text-sm font-semibold text-gray-900">
                 No listings found
               </h3>
               <p className="mt-1 text-sm text-gray-500">

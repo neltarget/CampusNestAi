@@ -1,3 +1,4 @@
+import { AlertTriangle, ShieldCheck } from "lucide-react";
 import type { VerificationResult } from "../types";
 
 interface VerificationSummaryProps {
@@ -7,8 +8,8 @@ interface VerificationSummaryProps {
 export function VerificationSummary({ verifications }: VerificationSummaryProps) {
   if (verifications.length === 0) {
     return (
-      <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-        <h3 className="text-sm font-semibold text-gray-900 mb-3">
+      <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-soft">
+        <h3 className="text-sm font-semibold font-display text-gray-900 mb-3">
           Verification Summary
         </h3>
         <p className="text-sm text-gray-500">No verification data available.</p>
@@ -34,10 +35,13 @@ export function VerificationSummary({ verifications }: VerificationSummaryProps)
   };
 
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-      <h3 className="text-sm font-semibold text-gray-900 mb-4">
-        Verification Summary
-      </h3>
+    <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-soft">
+      <div className="flex items-center gap-2 mb-4">
+        <ShieldCheck className="h-4 w-4 text-emerald-600" />
+        <h3 className="text-sm font-semibold font-display text-gray-900">
+          Verification Summary
+        </h3>
+      </div>
 
       <div className="space-y-4">
         <div className="flex items-center justify-between">
@@ -71,21 +75,9 @@ export function VerificationSummary({ verifications }: VerificationSummaryProps)
         </div>
 
         {totalIssues > 0 && (
-          <div className="rounded-lg bg-yellow-50 p-3">
+          <div className="rounded-xl bg-yellow-50 p-3">
             <div className="flex items-center gap-2">
-              <svg
-                className="h-4 w-4 text-yellow-500"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={2}
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z"
-                />
-              </svg>
+              <AlertTriangle className="h-4 w-4 text-yellow-500 shrink-0" />
               <span className="text-xs font-medium text-yellow-800">
                 {totalIssues} issues detected across all listings
               </span>
@@ -97,7 +89,7 @@ export function VerificationSummary({ verifications }: VerificationSummaryProps)
           {verifications.map((v) => (
             <div
               key={v.listingId}
-              className="flex items-center justify-between rounded-lg bg-gray-50 px-3 py-2"
+              className="flex items-center justify-between rounded-xl bg-gray-50 px-3 py-2 transition-colors duration-200 hover:bg-gray-100"
             >
               <span className="text-xs text-gray-600 truncate max-w-[120px]">
                 Listing {v.listingId.slice(0, 8)}
@@ -105,7 +97,7 @@ export function VerificationSummary({ verifications }: VerificationSummaryProps)
               <div className="flex items-center gap-2">
                 <div className="h-1.5 w-16 rounded-full bg-gray-200 overflow-hidden">
                   <div
-                    className={`h-full rounded-full ${
+                    className={`h-full rounded-full transition-all duration-500 ${
                       v.confidence >= 0.8
                         ? "bg-green-500"
                         : v.confidence >= 0.5

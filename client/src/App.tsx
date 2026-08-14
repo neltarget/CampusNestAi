@@ -19,36 +19,38 @@ function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-background">
           <Navbar />
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/search" element={<SearchPage />} />
-            <Route path="/results" element={<ResultsPage />} />
-            <Route path="/listing/:id" element={<ListingDetailsPage />} />
-            <Route path="/landlord/listing" element={<ListingWorkerPage />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
-            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-            <Route path="/reset-password" element={<ResetPasswordPage />} />
-            <Route path="/onboarding" element={<OnboardingPage />} />
-            <Route
-              path="/history"
-              element={
-                <ProtectedRoute>
-                  <SearchHistoryPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/profile"
-              element={
-                <ProtectedRoute>
-                  <ProfilePage />
-                </ProtectedRoute>
-              }
-            />
-          </Routes>
+          <main className="pt-16">
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/search" element={<SearchPage />} />
+              <Route path="/results" element={<ResultsPage />} />
+              <Route path="/listing/:id" element={<ListingDetailsPage />} />
+              <Route path="/landlord/listing" element={<ListingWorkerPage />} />
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/register" element={<RegisterPage />} />
+              <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+              <Route path="/reset-password" element={<ResetPasswordPage />} />
+              <Route path="/onboarding" element={<OnboardingPage />} />
+              <Route
+                path="/history"
+                element={
+                  <ProtectedRoute>
+                    <SearchHistoryPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/profile"
+                element={
+                  <ProtectedRoute>
+                    <ProfilePage />
+                  </ProtectedRoute>
+                }
+              />
+            </Routes>
+          </main>
         </div>
       </AuthProvider>
     </BrowserRouter>

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Search, Sparkles, ArrowRight } from "lucide-react";
 
 interface SearchBoxProps {
   onSearch: (query: string) => void;
@@ -19,6 +20,7 @@ export function SearchBox({
   disabled = false,
 }: SearchBoxProps) {
   const [query, setQuery] = useState("");
+  const [focused, setFocused] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,68 +37,61 @@ export function SearchBox({
   };
 
   return (
-    <div className="w-full">
+    <div className="w-full max-w-2xl mx-auto">
       <form onSubmit={handleSubmit} className="relative">
-        <div className="relative">
+        <div
+          className={`relative rounded-2xl transition-all duration-300 ${
+            focused
+              ? "shadow-elevated ring-2 ring-emerald-500/20"
+              : "shadow-medium"
+          }`}
+        >
           <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-5">
-            <svg
-              className="h-5 w-5 text-gray-400"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={1.5}
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
-              />
-            </svg>
+            <Search
+              className={`h-5 w-5 transition-colors duration-200 ${
+                focused ? "text-emerald-500" : "text-gray-400"
+              }`}
+            />
           </div>
           <input
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
+            onFocus={() => setFocused(true)}
+            onBlur={() => setFocused(false)}
             placeholder={placeholder}
             disabled={disabled}
-            className="block w-full rounded-2xl border border-gray-200 bg-white py-4 pl-13 pr-32 text-base text-gray-900 shadow-lg shadow-gray-200/50 placeholder:text-gray-400 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            className="block w-full rounded-2xl border border-gray-200 bg-white py-4 pl-13 pr-36 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed transition-all font-medium"
             aria-label="Search for accommodation"
           />
           <div className="absolute inset-y-0 right-2 flex items-center">
             <button
               type="submit"
               disabled={!query.trim() || disabled}
-              className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              className="inline-flex items-center gap-2 rounded-xl gradient-primary px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 active:scale-[0.98]"
             >
-              <svg
-                className="h-4 w-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={2}
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"
-                />
-              </svg>
+              <Sparkles className="h-4 w-4" />
               Search
             </button>
           </div>
         </div>
       </form>
 
-      <div className="mt-4 flex flex-wrap items-center gap-2">
-        <span className="text-xs text-gray-400">Try:</span>
+      <div className="mt-5 flex flex-wrap items-center gap-2">
+        <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">
+          Try
+        </span>
         {exampleQueries.map((example) => (
           <button
             key={example}
             onClick={() => handleExampleClick(example)}
             disabled={disabled}
-            className="rounded-full border border-gray-200 bg-white px-3 py-1 text-xs text-gray-600 hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            className="group inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white/80 px-3.5 py-1.5 text-xs font-medium text-gray-600 hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
           >
-            {example.length > 50 ? example.slice(0, 50) + "..." : example}
+            <span className="max-w-[180px] truncate">
+              {example.length > 45 ? example.slice(0, 45) + "..." : example}
+            </span>
+            <ArrowRight className="h-3 w-3 opacity-0 -ml-1 group-hover:opacity-100 group-hover:ml-0 transition-all duration-200" />
           </button>
         ))}
       </div>

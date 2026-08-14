@@ -2,14 +2,19 @@ import { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
 
 export function ProfilePage() {
-  const { user, profile, updateProfile, refreshProfile, loading: authLoading } = useAuth();
+  const {
+    user,
+    profile,
+    updateProfile,
+    refreshProfile,
+    loading: authLoading,
+  } = useAuth();
   const [fullName, setFullName] = useState("");
   const [role, setRole] = useState<"student" | "landlord">("student");
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState("");
 
-  // Sync form state with profile when it loads
   useEffect(() => {
     if (profile) {
       setFullName(profile.full_name);
@@ -38,7 +43,7 @@ export function ProfilePage() {
   if (authLoading) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-indigo-600 border-t-transparent" />
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-emerald-600 border-t-transparent" />
       </div>
     );
   }
@@ -51,12 +56,11 @@ export function ProfilePage() {
     );
   }
 
-  // Profile is still loading/creating
   if (!profile) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
         <div className="text-center">
-          <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-4 border-indigo-600 border-t-transparent" />
+          <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-4 border-emerald-600 border-t-transparent" />
           <p className="text-sm text-gray-500">Loading profile...</p>
         </div>
       </div>
@@ -65,21 +69,26 @@ export function ProfilePage() {
 
   return (
     <div className="mx-auto max-w-lg px-4 py-10">
-      <h1 className="mb-2 text-2xl font-bold text-gray-900">Profile</h1>
+      <h1 className="font-display mb-2 text-2xl font-bold text-gray-900">
+        Profile
+      </h1>
       <p className="mb-8 text-sm text-gray-500">Manage your account settings</p>
 
-      <div className="rounded-2xl border border-gray-100 bg-white p-8 shadow-lg shadow-gray-200/50">
+      <div className="rounded-2xl border border-gray-100 bg-white p-8 shadow-elevated">
         <div className="mb-6 flex items-center gap-4">
-          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-indigo-100 text-lg font-bold text-indigo-600">
-            {profile.full_name?.charAt(0)?.toUpperCase() || profile.email.charAt(0).toUpperCase()}
+          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100 text-lg font-bold text-emerald-600">
+            {profile.full_name?.charAt(0)?.toUpperCase() ||
+              profile.email.charAt(0).toUpperCase()}
           </div>
           <div>
-            <p className="font-semibold text-gray-900">{profile.full_name || "No name set"}</p>
+            <p className="font-semibold text-gray-900">
+              {profile.full_name || "No name set"}
+            </p>
             <p className="text-sm text-gray-500">{profile.email}</p>
           </div>
         </div>
 
-        <div className="mb-6 rounded-lg bg-gray-50 px-4 py-3 text-sm text-gray-600">
+        <div className="mb-6 rounded-xl bg-gray-50/50 px-4 py-3 text-sm text-gray-600">
           <span className="font-medium">Role:</span>{" "}
           <span className="capitalize">{profile.role}</span>
           <span className="ml-3 text-gray-400">&middot;</span>
@@ -89,20 +98,23 @@ export function ProfilePage() {
         </div>
 
         {error && (
-          <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          <div className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
             {error}
           </div>
         )}
 
         {saved && (
-          <div className="mb-4 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
+          <div className="mb-4 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
             Profile updated successfully
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label htmlFor="fullName" className="mb-1 block text-sm font-medium text-gray-700">
+            <label
+              htmlFor="fullName"
+              className="mb-1 block text-sm font-medium text-gray-700"
+            >
               Full Name
             </label>
             <input
@@ -110,20 +122,22 @@ export function ProfilePage() {
               type="text"
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
-              className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-900 placeholder:text-gray-400 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 focus:outline-none transition-all"
+              className="w-full rounded-xl border border-gray-200 bg-gray-50/50 px-4 py-3 text-sm text-gray-900 placeholder:text-gray-400 focus:bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 focus:outline-none transition-all duration-200"
               placeholder="Your name"
             />
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">Role</label>
+            <label className="mb-1 block text-sm font-medium text-gray-700">
+              Role
+            </label>
             <div className="flex gap-3">
               <button
                 type="button"
                 onClick={() => setRole("student")}
-                className={`flex-1 rounded-xl border-2 px-4 py-3 text-sm font-medium transition-all ${
+                className={`flex-1 rounded-xl border-2 px-4 py-3 text-sm font-medium transition-all duration-200 ${
                   role === "student"
-                    ? "border-indigo-600 bg-indigo-50 text-indigo-700"
+                    ? "border-emerald-600 bg-emerald-50 text-emerald-700"
                     : "border-gray-200 text-gray-600 hover:border-gray-300"
                 }`}
               >
@@ -132,9 +146,9 @@ export function ProfilePage() {
               <button
                 type="button"
                 onClick={() => setRole("landlord")}
-                className={`flex-1 rounded-xl border-2 px-4 py-3 text-sm font-medium transition-all ${
+                className={`flex-1 rounded-xl border-2 px-4 py-3 text-sm font-medium transition-all duration-200 ${
                   role === "landlord"
-                    ? "border-indigo-600 bg-indigo-50 text-indigo-700"
+                    ? "border-emerald-600 bg-emerald-50 text-emerald-700"
                     : "border-gray-200 text-gray-600 hover:border-gray-300"
                 }`}
               >
@@ -146,7 +160,7 @@ export function ProfilePage() {
           <button
             type="submit"
             disabled={saving}
-            className="w-full rounded-xl bg-indigo-600 px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            className="w-full rounded-xl gradient-primary px-4 py-3 text-sm font-semibold text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 hover:shadow-lg"
           >
             {saving ? "Saving..." : "Save changes"}
           </button>
