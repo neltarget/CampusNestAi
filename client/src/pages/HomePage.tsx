@@ -71,7 +71,7 @@ export function HomePage() {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="relative overflow-hidden gradient-hero pt-24 pb-20 sm:pt-32 sm:pb-28">
+      <section className="relative overflow-hidden gradient-hero pt-16 pb-12 sm:pt-20 sm:pb-16">
         {/* Subtle grid pattern */}
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#e5e7eb0a_1px,transparent_1px),linear-gradient(to_bottom,#e5e7eb0a_1px,transparent_1px)] bg-[size:64px_64px]" />
 
@@ -95,17 +95,17 @@ export function HomePage() {
             <span className="gradient-text">student home</span>
           </h1>
 
-          <p className="mt-6 text-lg text-gray-600 sm:text-xl max-w-2xl mx-auto leading-relaxed">
+          <p className="mt-4 text-lg text-gray-600 sm:text-xl max-w-2xl mx-auto leading-relaxed">
             {displayName
               ? `Welcome back, ${displayName.split(" ")[0]}. Describe what you need and our AI will find the best options.`
               : "Describe what you need in natural language. Our multi-stage AI agent thoroughly matches your interests with the best available accommodations."}
           </p>
 
-          <div className="mt-10">
+          <div className="mt-6">
             <SearchBox onSearch={handleSearch} />
           </div>
 
-          <div className="mt-8 flex items-center justify-center gap-6 text-sm text-gray-500">
+          <div className="mt-5 flex items-center justify-center gap-6 text-sm text-gray-500">
             <div className="flex items-center gap-2">
               <div className="flex -space-x-1.5">
                 {[
@@ -135,9 +135,9 @@ export function HomePage() {
       </section>
 
       {/* Features Section */}
-      <section className="py-20 sm:py-28 bg-white">
+      <section className="py-12 sm:py-16 bg-white">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-2xl mx-auto mb-16">
+          <div className="text-center max-w-2xl mx-auto mb-10">
             <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl font-display">
               How it works
             </h2>
@@ -174,9 +174,9 @@ export function HomePage() {
       </section>
 
       {/* AI Pipeline Section */}
-      <section className="py-20 sm:py-28 bg-surface-50">
+      <section className="py-12 sm:py-16 bg-surface-50">
         <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
+          <div className="text-center mb-10">
             <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl font-display">
               The Multi-Stage Agent Pipeline
             </h2>
@@ -234,7 +234,7 @@ export function HomePage() {
             </div>
           </div>
 
-          <div className="mt-12 text-center">
+          <div className="mt-8 text-center">
             <div className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2">
               <Zap className="h-4 w-4 text-emerald-600" />
               <span className="text-sm font-medium text-emerald-700">
