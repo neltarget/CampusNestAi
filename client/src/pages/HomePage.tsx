@@ -13,7 +13,6 @@ import {
   Database,
   BarChart3,
   CheckCircle2,
-  LogIn,
 } from "lucide-react";
 
 const features = [

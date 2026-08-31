@@ -1,5 +1,3 @@
-import { motion } from "motion/react";
-
 export function SkeletonCard() {
   return (
     <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-soft">
