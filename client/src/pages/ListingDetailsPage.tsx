@@ -10,8 +10,16 @@ import {
   Volume2,
   Star,
   ShieldCheck,
+  Phone,
+  Mail,
+  ChevronLeft,
+  ChevronRight,
+  Copy,
+  Check,
+  Share2,
 } from "lucide-react";
 import { VerificationBadge } from "../components/VerificationBadge";
+import { SkeletonDetail } from "../components/Skeleton";
 import { getListingById } from "../services/api";
 import type { Listing, Review, VerificationRecord, HostelCategory } from "../types";
 
@@ -24,6 +32,10 @@ export function ListingDetailsPage() {
   );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [showContactModal, setShowContactModal] = useState(false);
+  const [copiedPhone, setCopiedPhone] = useState(false);
+  const [showShareTooltip, setShowShareTooltip] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -103,14 +115,7 @@ export function ListingDetailsPage() {
   }, [id]);
 
   if (loading) {
-    return (
-      <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 text-center">
-        <div className="inline-flex items-center gap-3">
-          <div className="h-5 w-5 rounded-full border-2 border-emerald-600 border-t-transparent animate-spin" />
-          <span className="text-sm text-gray-500">Loading listing...</span>
-        </div>
-      </div>
-    );
+    return <SkeletonDetail />;
   }
 
   if (error || !listing) {
@@ -163,16 +168,72 @@ export function ListingDetailsPage() {
       <div className="grid gap-8 lg:grid-cols-3">
         {/* Main Content */}
         <div className="lg:col-span-2 space-y-6">
-          {/* Image */}
-          <div className="overflow-hidden rounded-2xl bg-gray-100">
+          {/* Image Carousel */}
+          <div className="relative overflow-hidden rounded-2xl bg-gray-100">
             <img
               src={
-                listing.images[0] ||
+                listing.images[currentImageIndex] ||
                 "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?w=800&h=600&fit=crop"
               }
               alt={listing.title}
-              className="h-80 w-full object-cover"
+              className="h-80 w-full object-cover sm:h-96"
             />
+            {listing.images.length > 1 && (
+              <>
+                <button
+                  onClick={() =>
+                    setCurrentImageIndex((prev) =>
+                      prev === 0 ? listing.images.length - 1 : prev - 1
+                    )
+                  }
+                  className="absolute left-3 top-1/2 -translate-y-1/2 rounded-full bg-white/90 p-2 shadow-lg hover:bg-white transition-all"
+                >
+                  <ChevronLeft className="h-5 w-5 text-gray-700" />
+                </button>
+                <button
+                  onClick={() =>
+                    setCurrentImageIndex((prev) =>
+                      prev === listing.images.length - 1 ? 0 : prev + 1
+                    )
+                  }
+                  className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-white/90 p-2 shadow-lg hover:bg-white transition-all"
+                >
+                  <ChevronRight className="h-5 w-5 text-gray-700" />
+                </button>
+                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
+                  {listing.images.map((_, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => setCurrentImageIndex(idx)}
+                      className={`h-2 rounded-full transition-all ${
+                        idx === currentImageIndex
+                          ? "bg-white w-6"
+                          : "bg-white/50 w-2"
+                      }`}
+                    />
+                  ))}
+                </div>
+              </>
+            )}
+            <button
+              onClick={() => {
+                if (navigator.share) {
+                  navigator.share({ title: listing.title, url: window.location.href });
+                } else {
+                  navigator.clipboard.writeText(window.location.href);
+                  setShowShareTooltip(true);
+                  setTimeout(() => setShowShareTooltip(false), 2000);
+                }
+              }}
+              className="absolute top-3 right-3 rounded-full bg-white/90 p-2 shadow-lg hover:bg-white transition-all"
+            >
+              <Share2 className="h-4 w-4 text-gray-700" />
+            </button>
+            {showShareTooltip && (
+              <div className="absolute top-14 right-3 rounded-lg bg-gray-900 px-3 py-1.5 text-xs text-white shadow-lg">
+                Link copied!
+              </div>
+            )}
           </div>
 
           {/* Title and Badge */}
@@ -331,7 +392,10 @@ export function ListingDetailsPage() {
               </div>
             </div>
 
-            <button className="mt-6 w-full rounded-xl gradient-primary px-4 py-3 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:shadow-lg">
+            <button
+              onClick={() => setShowContactModal(true)}
+              className="mt-6 w-full rounded-xl gradient-primary px-4 py-3 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:shadow-lg"
+            >
               Contact Landlord
             </button>
           </div>
@@ -368,6 +432,78 @@ export function ListingDetailsPage() {
           )}
         </div>
       </div>
+
+      {/* Contact Modal */}
+      {showContactModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4">
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-display text-lg font-semibold text-gray-900">
+                Contact Landlord
+              </h3>
+              <button
+                onClick={() => setShowContactModal(false)}
+                className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-all"
+              >
+                <span className="text-xl leading-none">&times;</span>
+              </button>
+            </div>
+            <p className="text-sm text-gray-500 mb-4">
+              Reach out to the landlord of <strong>{listing.title}</strong>
+            </p>
+            <div className="space-y-3">
+              <a
+                href="tel:+233501234567"
+                className="flex items-center gap-3 rounded-xl border border-gray-200 p-4 hover:bg-gray-50 transition-all group"
+              >
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-50 text-emerald-600 group-hover:bg-emerald-100 transition-all">
+                  <Phone className="h-5 w-5" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-gray-900">Call</p>
+                  <p className="text-xs text-gray-500">+233 50 123 4567</p>
+                </div>
+              </a>
+              <a
+                href="mailto:landlord@campusnest.com"
+                className="flex items-center gap-3 rounded-xl border border-gray-200 p-4 hover:bg-gray-50 transition-all group"
+              >
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-50 text-blue-600 group-hover:bg-blue-100 transition-all">
+                  <Mail className="h-5 w-5" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-gray-900">Email</p>
+                  <p className="text-xs text-gray-500">landlord@campusnest.com</p>
+                </div>
+              </a>
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText("+233501234567");
+                  setCopiedPhone(true);
+                  setTimeout(() => setCopiedPhone(false), 2000);
+                }}
+                className="flex w-full items-center gap-3 rounded-xl border border-gray-200 p-4 hover:bg-gray-50 transition-all group"
+              >
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-violet-50 text-violet-600 group-hover:bg-violet-100 transition-all">
+                  {copiedPhone ? <Check className="h-5 w-5" /> : <Copy className="h-5 w-5" />}
+                </div>
+                <div className="flex-1 text-left">
+                  <p className="text-sm font-medium text-gray-900">
+                    {copiedPhone ? "Copied!" : "Copy Phone Number"}
+                  </p>
+                  <p className="text-xs text-gray-500">+233 50 123 4567</p>
+                </div>
+              </button>
+            </div>
+            <button
+              onClick={() => setShowContactModal(false)}
+              className="mt-4 w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-100 transition-all"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

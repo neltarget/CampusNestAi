@@ -13,6 +13,7 @@ import {
   Database,
   BarChart3,
   CheckCircle2,
+  LogIn,
 } from "lucide-react";
 
 const features = [
@@ -61,6 +62,10 @@ export function HomePage() {
   const { user, profile } = useAuth();
 
   const handleSearch = (query: string) => {
+    if (!user) {
+      navigate("/login", { state: { from: "/", searchQuery: query } });
+      return;
+    }
     navigate(`/search?q=${encodeURIComponent(query)}`);
   };
 
@@ -100,6 +105,20 @@ export function HomePage() {
               ? `Welcome back, ${displayName.split(" ")[0]}. Describe what you need and our AI will find the best options.`
               : "Describe what you need in natural language. Our multi-stage AI agent thoroughly matches your interests with the best available accommodations."}
           </p>
+
+          {!user && (
+            <div className="mt-6 inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-4 py-2">
+              <span className="text-sm text-amber-700">
+                Create a free account to start searching
+              </span>
+              <button
+                onClick={() => navigate("/register")}
+                className="inline-flex items-center gap-1 text-sm font-semibold text-amber-800 hover:text-amber-900"
+              >
+                Sign up <ArrowRight className="h-3 w-3" />
+              </button>
+            </div>
+          )}
 
           <div className="mt-6">
             <SearchBox onSearch={handleSearch} />

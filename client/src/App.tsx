@@ -1,4 +1,5 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { AnimatePresence, motion } from "motion/react";
 import { AuthProvider } from "./contexts/AuthContext";
 import { Navbar } from "./components/Navbar";
 import { ProtectedRoute } from "./components/ProtectedRoute";
@@ -15,6 +16,51 @@ import { OnboardingPage } from "./pages/OnboardingPage";
 import { SearchHistoryPage } from "./pages/SearchHistoryPage";
 import { ProfilePage } from "./pages/ProfilePage";
 
+function AnimatedRoutes() {
+  const location = useLocation();
+
+  return (
+    <AnimatePresence mode="wait">
+      <motion.div
+        key={location.pathname}
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -8 }}
+        transition={{ duration: 0.2, ease: "easeInOut" }}
+      >
+        <Routes location={location}>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/search" element={<SearchPage />} />
+          <Route path="/results" element={<ResultsPage />} />
+          <Route path="/listing/:id" element={<ListingDetailsPage />} />
+          <Route path="/landlord/listing" element={<ListingWorkerPage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
+          <Route path="/onboarding" element={<OnboardingPage />} />
+          <Route
+            path="/history"
+            element={
+              <ProtectedRoute>
+                <SearchHistoryPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <ProfilePage />
+              </ProtectedRoute>
+            }
+          />
+        </Routes>
+      </motion.div>
+    </AnimatePresence>
+  );
+}
+
 function App() {
   return (
     <BrowserRouter>
@@ -22,34 +68,7 @@ function App() {
         <div className="min-h-screen bg-background">
           <Navbar />
           <main className="pt-16">
-            <Routes>
-              <Route path="/" element={<HomePage />} />
-              <Route path="/search" element={<SearchPage />} />
-              <Route path="/results" element={<ResultsPage />} />
-              <Route path="/listing/:id" element={<ListingDetailsPage />} />
-              <Route path="/landlord/listing" element={<ListingWorkerPage />} />
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/register" element={<RegisterPage />} />
-              <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-              <Route path="/reset-password" element={<ResetPasswordPage />} />
-              <Route path="/onboarding" element={<OnboardingPage />} />
-              <Route
-                path="/history"
-                element={
-                  <ProtectedRoute>
-                    <SearchHistoryPage />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/profile"
-                element={
-                  <ProtectedRoute>
-                    <ProfilePage />
-                  </ProtectedRoute>
-                }
-              />
-            </Routes>
+            <AnimatedRoutes />
           </main>
         </div>
       </AuthProvider>

@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import { Search, Trash2, Clock } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { Search, Trash2, Clock, Play } from "lucide-react";
+import { motion } from "motion/react";
 import { supabase } from "../lib/supabase";
 import { useAuth } from "../contexts/AuthContext";
+import { SkeletonHistory } from "../components/Skeleton";
 
 interface SearchHistoryItem {
   id: string;
@@ -13,6 +15,7 @@ interface SearchHistoryItem {
 
 export function SearchHistoryPage() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [history, setHistory] = useState<SearchHistoryItem[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -79,9 +82,7 @@ export function SearchHistoryPage() {
       </p>
 
       {loading ? (
-        <div className="flex justify-center py-12">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-emerald-600 border-t-transparent" />
-        </div>
+        <SkeletonHistory />
       ) : history.length === 0 ? (
         <div className="rounded-2xl border border-gray-100 bg-white p-12 text-center shadow-elevated">
           <Search className="mx-auto mb-4 h-12 w-12 text-gray-300" />
@@ -94,14 +95,29 @@ export function SearchHistoryPage() {
           </Link>
         </div>
       ) : (
-        <div className="space-y-3">
+        <motion.div
+          className="space-y-3"
+          initial="hidden"
+          animate="visible"
+          variants={{
+            hidden: {},
+            visible: { transition: { staggerChildren: 0.05 } },
+          }}
+        >
           {history.map((item) => (
-            <div
+            <motion.div
               key={item.id}
-              className="flex items-center justify-between rounded-2xl border border-gray-100 bg-white p-4 shadow-sm hover:shadow-elevated transition-all duration-300"
+              variants={{
+                hidden: { opacity: 0, x: -10 },
+                visible: { opacity: 1, x: 0 },
+              }}
+              className="group flex items-center justify-between rounded-2xl border border-gray-100 bg-white p-4 shadow-sm hover:shadow-elevated transition-all duration-300"
             >
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-medium text-gray-900">
+              <div
+                className="min-w-0 flex-1 cursor-pointer"
+                onClick={() => navigate(`/search?q=${encodeURIComponent(item.search_query)}`)}
+              >
+                <p className="truncate text-sm font-medium text-gray-900 group-hover:text-emerald-600 transition-colors">
                   {item.search_query}
                 </p>
                 <p className="mt-0.5 flex items-center gap-1 text-xs text-gray-400">
@@ -115,7 +131,14 @@ export function SearchHistoryPage() {
                   )}
                 </p>
               </div>
-              <div className="ml-4 flex items-center gap-2">
+              <div className="ml-4 flex items-center gap-1">
+                <button
+                  onClick={() => navigate(`/search?q=${encodeURIComponent(item.search_query)}`)}
+                  className="rounded-lg p-2 text-gray-400 hover:bg-emerald-50 hover:text-emerald-600 transition-all duration-200"
+                  title="Re-run search"
+                >
+                  <Play className="h-4 w-4" />
+                </button>
                 <button
                   onClick={() => handleDelete(item.id)}
                   className="rounded-lg p-2 text-gray-400 hover:bg-red-50 hover:text-red-500 transition-all duration-200"
@@ -124,9 +147,9 @@ export function SearchHistoryPage() {
                   <Trash2 className="h-4 w-4" />
                 </button>
               </div>
-            </div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       )}
     </div>
   );

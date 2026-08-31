@@ -1,13 +1,14 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { AlertCircle } from "lucide-react";
 import { SearchBox } from "../components/SearchBox";
+import { useAuth } from "../contexts/AuthContext";
 import { StageTimeline } from "../components/StageTimeline";
 import { StageOutputPanel } from "../components/StageOutputPanel";
 import { RecommendationCard } from "../components/RecommendationCard";
 import { VerificationSummary } from "../components/VerificationSummary";
 import { PipelineSummary } from "../components/PipelineSummary";
-import { searchAccommodationStream } from "../services/api";
+import { searchAccommodationStream, saveSearchHistory } from "../services/api";
 import type {
   SearchResult,
   StageStepState,
@@ -28,6 +29,8 @@ const PIPELINE_STAGES = [
 
 export function SearchPage() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const [phase, setPhase] = useState<SearchPhase>("idle");
   const [stages, setStages] = useState<StageStepState[]>([]);
   const [selectedStage, setSelectedStage] = useState<string | null>(null);
@@ -122,6 +125,15 @@ export function SearchPage() {
             } else {
               setResult(searchResult);
               setPhase("results");
+              saveSearchHistory(
+                query,
+                searchResult.explanation,
+                searchResult.listings.map((r) => ({
+                  listingId: r.listing.id,
+                  title: r.listing.title,
+                  score: r.score,
+                }))
+              ).catch(() => {});
             }
             searchingRef.current = false;
             break;
@@ -146,6 +158,10 @@ export function SearchPage() {
   }, [initialQuery, startSearch]);
 
   const handleSearch = (query: string) => {
+    if (!user) {
+      navigate("/login", { state: { from: "/search", searchQuery: query } });
+      return;
+    }
     setSearchParams({ q: query }, { replace: true });
     startSearch(query);
   };

@@ -1,14 +1,21 @@
 import { Link } from "react-router-dom";
+import { motion } from "motion/react";
 import type { Listing } from "../types";
 import { VerificationBadge } from "./VerificationBadge";
 import { MapPin, Wifi, UtensilsCrossed, Star } from "lucide-react";
 
 interface ListingCardProps {
   listing: Listing;
+  index?: number;
 }
 
-export function ListingCard({ listing }: ListingCardProps) {
+export function ListingCard({ listing, index = 0 }: ListingCardProps) {
   return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, delay: index * 0.08, ease: "easeOut" }}
+    >
     <Link
       to={`/listing/${listing.id}`}
       className="group block overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-soft hover:shadow-elevated hover:border-gray-200 transition-all duration-300"
@@ -89,5 +96,6 @@ export function ListingCard({ listing }: ListingCardProps) {
         )}
       </div>
     </Link>
+    </motion.div>
   );
 }

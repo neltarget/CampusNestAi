@@ -1,15 +1,21 @@
 import { useState, useEffect } from "react";
-import { Search, SlidersHorizontal } from "lucide-react";
+import { Link } from "react-router-dom";
+import { motion } from "motion/react";
+import { Search, SlidersHorizontal, LogIn } from "lucide-react";
 import { ListingCard } from "../components/ListingCard";
+import { SkeletonCard } from "../components/Skeleton";
 import { getAllListings } from "../services/api";
+import { useAuth } from "../contexts/AuthContext";
 import type { Listing } from "../types";
 
 export function ResultsPage() {
+  const { user } = useAuth();
   const [allListings, setAllListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedLocation, setSelectedLocation] = useState<string>("all");
   const [selectedPriceRange, setSelectedPriceRange] = useState<string>("all");
   const [wifiOnly, setWifiOnly] = useState(false);
+  const [sortBy, setSortBy] = useState<string>("default");
 
   useEffect(() => {
     let cancelled = false;
@@ -34,24 +40,56 @@ export function ResultsPage() {
     { label: "Over GHS 8,000", min: 8000, max: Infinity },
   ];
 
-  const filteredListings = allListings.filter((listing) => {
-    if (selectedLocation !== "all" && listing.location !== selectedLocation) {
-      return false;
-    }
-    if (selectedPriceRange !== "all") {
-      const range = priceRanges.find((r) => r.label === selectedPriceRange);
-      if (range && (listing.price < range.min || listing.price >= range.max)) {
+  const filteredListings = allListings
+    .filter((listing) => {
+      if (selectedLocation !== "all" && listing.location !== selectedLocation) {
         return false;
       }
-    }
-    if (wifiOnly && !listing.wifi) {
-      return false;
-    }
-    return true;
-  });
+      if (selectedPriceRange !== "all") {
+        const range = priceRanges.find((r) => r.label === selectedPriceRange);
+        if (range && (listing.price < range.min || listing.price >= range.max)) {
+          return false;
+        }
+      }
+      if (wifiOnly && !listing.wifi) {
+        return false;
+      }
+      return true;
+    })
+    .sort((a, b) => {
+      switch (sortBy) {
+        case "price-low":
+          return a.price - b.price;
+        case "price-high":
+          return b.price - a.price;
+        case "distance":
+          return a.distance - b.distance;
+        case "rating":
+          return (b.reviewScore ?? 0) - (a.reviewScore ?? 0);
+        default:
+          return 0;
+      }
+    });
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      {!user && (
+        <div className="mb-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <LogIn className="h-5 w-5 text-emerald-600" />
+            <p className="text-sm text-emerald-800">
+              <strong>Sign in to save favorites</strong> and get personalized AI recommendations.
+            </p>
+          </div>
+          <Link
+            to="/login"
+            className="shrink-0 rounded-xl gradient-primary px-4 py-2 text-sm font-semibold text-white shadow-sm hover:shadow-md transition-all"
+          >
+            Sign in
+          </Link>
+        </div>
+      )}
+
       <div className="flex flex-col gap-8 lg:flex-row">
         {/* Filters Sidebar */}
         <aside className="w-full shrink-0 lg:w-64">
@@ -134,19 +172,29 @@ export function ResultsPage() {
             <h2 className="font-display text-lg font-semibold text-gray-900">
               All Listings
             </h2>
-            <span className="text-sm text-gray-500">
-              {loading ? "Loading..." : `${filteredListings.length} results`}
-            </span>
+            <div className="flex items-center gap-3">
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="rounded-xl border border-gray-200 bg-gray-50/50 px-3 py-2 text-sm text-gray-700 focus:bg-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none transition-all duration-200"
+              >
+                <option value="default">Sort by</option>
+                <option value="price-low">Price: Low to High</option>
+                <option value="price-high">Price: High to Low</option>
+                <option value="distance">Distance from Campus</option>
+                <option value="rating">Top Rated</option>
+              </select>
+              <span className="text-sm text-gray-500">
+                {loading ? "Loading..." : `${filteredListings.length} results`}
+              </span>
+            </div>
           </div>
 
           {loading ? (
-            <div className="rounded-2xl border border-gray-100 bg-white p-12 text-center shadow-elevated">
-              <div className="inline-flex items-center gap-3">
-                <div className="h-5 w-5 rounded-full border-2 border-emerald-600 border-t-transparent animate-spin" />
-                <span className="text-sm text-gray-500">
-                  Loading listings...
-                </span>
-              </div>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {[1, 2, 3, 4, 5, 6].map((i) => (
+                <SkeletonCard key={i} />
+              ))}
             </div>
           ) : filteredListings.length === 0 ? (
             <div className="rounded-2xl border border-gray-100 bg-white p-12 text-center shadow-elevated">
@@ -159,11 +207,19 @@ export function ResultsPage() {
               </p>
             </div>
           ) : (
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {filteredListings.map((listing) => (
-                <ListingCard key={listing.id} listing={listing} />
+            <motion.div
+              className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
+              initial="hidden"
+              animate="visible"
+              variants={{
+                hidden: {},
+                visible: { transition: { staggerChildren: 0.06 } },
+              }}
+            >
+              {filteredListings.map((listing, index) => (
+                <ListingCard key={listing.id} listing={listing} index={index} />
               ))}
-            </div>
+            </motion.div>
           )}
         </div>
       </div>
