@@ -1,4 +1,6 @@
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { motion } from "motion/react";
 import { SearchBox } from "../components/SearchBox";
 import { useAuth } from "../contexts/AuthContext";
 import { getTimeGreeting, getFirstName } from "../lib/auth-helpers";
@@ -59,6 +61,8 @@ const pipelineSteps = [
 export function HomePage() {
   const navigate = useNavigate();
   const { user, profile } = useAuth();
+  const [cursorVisible, setCursorVisible] = useState(true);
+  const [cursorFading, setCursorFading] = useState(false);
 
   const handleSearch = (query: string) => {
     if (!user) {
@@ -72,6 +76,20 @@ export function HomePage() {
   const displayName =
     profile?.full_name || (user ? getFirstName(user) : null);
 
+  const line1 = "Find your perfect";
+  const line2 = "student home";
+  const totalChars = line1.length + line2.length;
+
+  useEffect(() => {
+    const typingDuration = totalChars * 0.04 * 1000;
+    const blinkDuration = 1500;
+    const fadeTimer = setTimeout(() => {
+      setCursorFading(true);
+      setTimeout(() => setCursorVisible(false), 500);
+    }, typingDuration + blinkDuration);
+    return () => clearTimeout(fadeTimer);
+  }, [totalChars]);
+
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
@@ -79,9 +97,10 @@ export function HomePage() {
         {/* Subtle grid pattern */}
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#e5e7eb0a_1px,transparent_1px),linear-gradient(to_bottom,#e5e7eb0a_1px,transparent_1px)] bg-[size:64px_64px]" />
 
-        {/* Gradient orbs */}
-        <div className="absolute top-20 left-1/4 h-72 w-72 rounded-full bg-emerald-200/30 blur-3xl" />
-        <div className="absolute top-40 right-1/4 h-64 w-64 rounded-full bg-blue-200/20 blur-3xl" />
+        {/* Animated gradient orbs */}
+        <div className="hero-orb-1 absolute top-16 left-1/6 h-96 w-96 rounded-full bg-emerald-300/40 blur-3xl" />
+        <div className="hero-orb-2 absolute top-32 right-1/5 h-80 w-80 rounded-full bg-teal-300/30 blur-3xl" />
+        <div className="hero-orb-3 absolute bottom-8 left-1/3 h-72 w-72 rounded-full bg-sky-200/25 blur-3xl" />
 
         <div className="relative mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 text-center">
           {greeting && (
@@ -93,20 +112,68 @@ export function HomePage() {
             </div>
           )}
 
-          <h1 className="text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl lg:text-6xl font-display">
-            Find your perfect
-            <br />
-            <span className="gradient-text">student home</span>
+          <h1 className="text-5xl sm:text-6xl lg:text-7xl tracking-tight text-gray-900" style={{ fontFamily: "var(--font-hero)" }}>
+            <span className="block">
+              {line1.split("").map((char, i) => (
+                <motion.span
+                  key={`l1-${i}`}
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{
+                    duration: 0.3,
+                    delay: i * 0.04,
+                    ease: "easeOut",
+                  }}
+                  className="inline-block"
+                >
+                  {char === " " ? "\u00A0" : char}
+                </motion.span>
+              ))}
+            </span>
+            <span className="block mt-1">
+              {line2.split("").map((char, i) => (
+                <motion.span
+                  key={`l2-${i}`}
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{
+                    duration: 0.3,
+                    delay: (line1.length + i) * 0.04,
+                    ease: "easeOut",
+                  }}
+                  className="inline-block gradient-text"
+                >
+                  {char === " " ? "\u00A0" : char}
+                </motion.span>
+              ))}
+              {cursorVisible && (
+                <span
+                  className={`inline-block w-[3px] h-[0.85em] ml-1 -mb-[2px] bg-emerald-500 rounded-full align-middle ${
+                    cursorFading ? "cursor-fade" : "cursor-blink"
+                  }`}
+                />
+              )}
+            </span>
           </h1>
 
-          <p className="mt-4 text-lg text-gray-600 sm:text-xl max-w-2xl mx-auto leading-relaxed">
+          <motion.p
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: totalChars * 0.04 + 0.5 }}
+            className="mt-6 text-lg text-gray-600 sm:text-xl max-w-2xl mx-auto leading-relaxed"
+          >
             {displayName
               ? `Welcome back, ${displayName.split(" ")[0]}. Describe what you need and our AI will find the best options.`
               : "Describe what you need in natural language. Our multi-stage AI agent thoroughly matches your interests with the best available accommodations."}
-          </p>
+          </motion.p>
 
           {!user && (
-            <div className="mt-6 inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-4 py-2">
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: totalChars * 0.04 + 0.8 }}
+              className="mt-6 inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-4 py-2"
+            >
               <span className="text-sm text-amber-700">
                 Create a free account to start searching
               </span>
@@ -116,14 +183,24 @@ export function HomePage() {
               >
                 Sign up <ArrowRight className="h-3 w-3" />
               </button>
-            </div>
+            </motion.div>
           )}
 
-          <div className="mt-6">
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: totalChars * 0.04 + 1.0 }}
+            className="mt-6"
+          >
             <SearchBox onSearch={handleSearch} />
-          </div>
+          </motion.div>
 
-          <div className="mt-5 flex items-center justify-center gap-6 text-sm text-gray-500">
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: totalChars * 0.04 + 1.2 }}
+            className="mt-5 flex items-center justify-center gap-6 text-sm text-gray-500"
+          >
             <div className="flex items-center gap-2">
               <div className="flex -space-x-1.5">
                 {[
@@ -148,7 +225,7 @@ export function HomePage() {
               <ShieldCheck className="h-4 w-4 text-emerald-500" />
               <span>AI-verified listings</span>
             </div>
-          </div>
+          </motion.div>
         </div>
       </section>
 
