@@ -98,9 +98,9 @@ export function HomePage() {
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#e5e7eb0a_1px,transparent_1px),linear-gradient(to_bottom,#e5e7eb0a_1px,transparent_1px)] bg-[size:64px_64px]" />
 
         {/* Animated gradient orbs */}
-        <div className="hero-orb-1 absolute top-16 left-1/6 h-96 w-96 rounded-full bg-emerald-300/40 blur-3xl" />
-        <div className="hero-orb-2 absolute top-32 right-1/5 h-80 w-80 rounded-full bg-teal-300/30 blur-3xl" />
-        <div className="hero-orb-3 absolute bottom-8 left-1/3 h-72 w-72 rounded-full bg-sky-200/25 blur-3xl" />
+        <div className="hero-orb-1 absolute top-16 left-1/6 h-96 w-96 rounded-full bg-emerald-400/50 blur-3xl" />
+        <div className="hero-orb-2 absolute top-32 right-1/5 h-80 w-80 rounded-full bg-teal-400/40 blur-3xl" />
+        <div className="hero-orb-3 absolute bottom-8 left-1/3 h-72 w-72 rounded-full bg-cyan-300/35 blur-3xl" />
 
         <div className="relative mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 text-center">
           {greeting && (
@@ -112,7 +112,7 @@ export function HomePage() {
             </div>
           )}
 
-          <h1 className="text-5xl sm:text-6xl lg:text-7xl tracking-tight text-gray-900" style={{ fontFamily: "var(--font-hero)" }}>
+          <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-gray-900" style={{ fontFamily: "var(--font-hero)" }}>
             <span className="block">
               {line1.split("").map((char, i) => (
                 <motion.span
