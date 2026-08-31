@@ -50,6 +50,7 @@ interface OrchestratorResponse {
     gender: string | null;
     preferences: string[];
     amenities: string[];
+    category: string | null;
   };
   searchSummary: {
     totalFound: number;
@@ -263,6 +264,27 @@ function extractIntent(query: string): SearchCriteria {
   if (lower.includes("wifi") || lower.includes("internet"))
     amenities.push("wifi");
   if (lower.includes("kitchen")) amenities.push("kitchen");
+  if (lower.includes("ac") || lower.includes("air condition"))
+    amenities.push("ac");
+  if (lower.includes("generator")) amenities.push("generator");
+  if (lower.includes("cctv") || lower.includes("security"))
+    amenities.push("cctv");
+  if (lower.includes("study room")) amenities.push("study_room");
+  if (lower.includes("parking")) amenities.push("parking");
+  if (lower.includes("shuttle")) amenities.push("shuttle");
+
+  // Detect category from budget or explicit mention
+  let category: "budget" | "mid_range" | "premium" | "luxury" | null = null;
+  if (lower.includes("budget") || lower.includes("cheap") || lower.includes("affordable")) {
+    category = "budget";
+  } else if (lower.includes("luxury") || lower.includes("premium") || lower.includes("executive")) {
+    category = "luxury";
+  } else if (budget !== null) {
+    if (budget <= 5000) category = "budget";
+    else if (budget <= 8000) category = "mid_range";
+    else if (budget <= 15000) category = "premium";
+    else category = "luxury";
+  }
 
   return {
     university,
@@ -272,6 +294,7 @@ function extractIntent(query: string): SearchCriteria {
     preferences,
     amenities,
     distance: null,
+    category,
   };
 }
 
@@ -288,12 +311,15 @@ async function performAIReasoning(
     id: r.listing.id,
     title: r.listing.title,
     location: r.listing.location,
+    area: r.listing.area,
     price: r.listing.price,
     distance: r.listing.distance,
     wifi: r.listing.wifi,
     kitchen: r.listing.kitchen,
     gender: r.listing.gender,
     noiseLevel: r.listing.noiseLevel,
+    category: r.listing.category,
+    amenities: r.listing.amenities,
     reviewScore: r.listing.reviewScore,
     score: r.score,
     reason: r.reason,

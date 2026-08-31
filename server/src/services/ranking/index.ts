@@ -101,6 +101,21 @@ function scoreListing(
     reasons.push("Highly rated");
   }
 
+  // Category match
+  if (criteria.category && listing.category === criteria.category) {
+    score += 10;
+    reasons.push(`Matches ${listing.category} category`);
+  }
+
+  // Amenities match (beyond wifi/kitchen which are already handled)
+  const matchingAmenities = listing.amenities.filter((a) =>
+    criteria.amenities.includes(a)
+  );
+  if (matchingAmenities.length > 0) {
+    score += matchingAmenities.length * 3;
+    reasons.push(`Has ${matchingAmenities.join(", ")}`);
+  }
+
   // Normalize score to 0-100 range
   const normalizedScore = Math.max(0, Math.min(100, score + 50));
 

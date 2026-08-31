@@ -6,7 +6,7 @@
  */
 
 import getClient from "../supabase.js";
-import type { SearchCriteria, Listing } from "../../types/index.js";
+import type { SearchCriteria, Listing, HostelCategory } from "../../types/index.js";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type SupabaseRow = Record<string, any>;
@@ -27,6 +27,7 @@ export async function searchAccommodation(
       description,
       university,
       location,
+      area,
       price,
       distance,
       wifi,
@@ -34,6 +35,8 @@ export async function searchAccommodation(
       kitchen,
       gender,
       noise_level,
+      category,
+      amenities,
       created_at,
       images!inner(url),
       reviews(rating),
@@ -57,12 +60,23 @@ export async function searchAccommodation(
     query = query.lte("distance", criteria.distance);
   }
 
+  if (criteria.category) {
+    query = query.eq("category", criteria.category);
+  }
+
   if (criteria.amenities.includes("wifi")) {
     query = query.eq("wifi", true);
   }
 
   if (criteria.amenities.includes("kitchen")) {
     query = query.eq("kitchen", true);
+  }
+
+  // Filter by amenities array contains
+  for (const amenity of criteria.amenities) {
+    if (!["wifi", "kitchen"].includes(amenity)) {
+      query = query.contains("amenities", [amenity]);
+    }
   }
 
   // Order by price and limit results
@@ -89,6 +103,7 @@ export async function getListingById(id: string): Promise<Listing | null> {
       description,
       university,
       location,
+      area,
       price,
       distance,
       wifi,
@@ -96,6 +111,8 @@ export async function getListingById(id: string): Promise<Listing | null> {
       kitchen,
       gender,
       noise_level,
+      category,
+      amenities,
       created_at,
       images!inner(url),
       reviews(rating),
@@ -124,6 +141,7 @@ export async function getAllListings(): Promise<Listing[]> {
       description,
       university,
       location,
+      area,
       price,
       distance,
       wifi,
@@ -131,6 +149,8 @@ export async function getAllListings(): Promise<Listing[]> {
       kitchen,
       gender,
       noise_level,
+      category,
+      amenities,
       created_at,
       images!inner(url),
       reviews(rating),
@@ -175,12 +195,25 @@ function mapListings(rows: SupabaseRow[]): Listing[] {
       ? verificationRecords[0]?.confidence ?? null
       : null;
 
+    // Parse amenities (Supabase returns as array or JSON string)
+    let amenities: string[] = [];
+    if (Array.isArray(row.amenities)) {
+      amenities = row.amenities;
+    } else if (typeof row.amenities === "string") {
+      try {
+        amenities = JSON.parse(row.amenities);
+      } catch {
+        amenities = [];
+      }
+    }
+
     return {
       id: row.id,
       title: row.title,
       description: row.description,
       university: row.university,
       location: row.location,
+      area: row.area ?? "",
       price: Number(row.price),
       distance: Number(row.distance),
       wifi: row.wifi,
@@ -188,6 +221,8 @@ function mapListings(rows: SupabaseRow[]): Listing[] {
       kitchen: row.kitchen,
       gender: row.gender,
       noiseLevel: row.noise_level,
+      category: (row.category as HostelCategory) ?? "budget",
+      amenities,
       images,
       reviewScore: reviewScore !== null ? Number(reviewScore) : null,
       verificationScore: verificationScore !== null ? Number(verificationScore) : null,

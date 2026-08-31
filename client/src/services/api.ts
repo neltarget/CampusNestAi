@@ -183,6 +183,7 @@ export async function createListing(listing: {
   description: string;
   university: string;
   location: string;
+  area: string;
   price: number;
   distance: number;
   wifi: boolean;
@@ -190,6 +191,8 @@ export async function createListing(listing: {
   kitchen: boolean;
   gender: string;
   noiseLevel: string;
+  category: string;
+  amenities: string[];
 }): Promise<{ success: boolean; listingId?: string; error?: string }> {
   const response = await authFetch(`${API_BASE}/listing`, {
     method: "POST",
