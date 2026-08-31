@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import { VerificationBadge } from "../components/VerificationBadge";
 import { getListingById } from "../services/api";
-import type { Listing, Review, VerificationRecord } from "../types";
+import type { Listing, Review, VerificationRecord, HostelCategory } from "../types";
 
 export function ListingDetailsPage() {
   const { id } = useParams<{ id: string }>();
@@ -48,6 +48,7 @@ export function ListingDetailsPage() {
         description: String(raw.description),
         university: String(raw.university),
         location: String(raw.location),
+        area: String(raw.area ?? ""),
         price: Number(raw.price),
         distance: Number(raw.distance),
         wifi: Boolean(raw.wifi),
@@ -55,6 +56,10 @@ export function ListingDetailsPage() {
         kitchen: Boolean(raw.kitchen),
         gender: String(raw.gender),
         noiseLevel: String(raw.noiseLevel),
+        category: ((raw.category as HostelCategory) ?? "mid_range"),
+        amenities: Array.isArray(raw.amenities)
+          ? raw.amenities.map((a: unknown) => String(a)).filter(Boolean)
+          : [],
         images: Array.isArray(raw.images)
           ? raw.images.map((i: unknown) => String(i)).filter(Boolean)
           : raw.images

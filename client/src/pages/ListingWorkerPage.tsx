@@ -58,6 +58,7 @@ export function ListingWorkerPage() {
         description: result.description,
         university: result.university,
         location: result.location,
+        area: result.area,
         price: result.price,
         distance: result.distance,
         wifi: result.wifi,
@@ -65,6 +66,8 @@ export function ListingWorkerPage() {
         kitchen: result.kitchen,
         gender: result.gender,
         noiseLevel: result.noiseLevel,
+        category: result.category,
+        amenities: result.amenities,
       });
 
       if (response.success && response.listingId) {
@@ -197,6 +200,12 @@ export function ListingWorkerPage() {
             </div>
             <div>
               <label className="text-xs font-medium text-gray-500">
+                Area
+              </label>
+              <p className="mt-1 text-sm text-gray-900">{result.area}</p>
+            </div>
+            <div>
+              <label className="text-xs font-medium text-gray-500">
                 Price
               </label>
               <p className="mt-1 text-sm text-gray-900">
@@ -249,6 +258,24 @@ export function ListingWorkerPage() {
               </label>
               <p className="mt-1 text-sm text-gray-900 capitalize">
                 {result.noiseLevel}
+              </p>
+            </div>
+            <div>
+              <label className="text-xs font-medium text-gray-500">
+                Category
+              </label>
+              <p className="mt-1 text-sm text-gray-900 capitalize">
+                {result.category.replace("_", " ")}
+              </p>
+            </div>
+            <div>
+              <label className="text-xs font-medium text-gray-500">
+                Amenities
+              </label>
+              <p className="mt-1 text-sm text-gray-900">
+                {result.amenities.length > 0
+                  ? result.amenities.join(", ")
+                  : "None"}
               </p>
             </div>
           </div>
