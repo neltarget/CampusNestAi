@@ -31,3 +31,8 @@ coverage/
 
 # TypeScript
 *.tsbuildinfo
+
+# Miscellaneous
+docs/
+.FINAL_REPORT.md
+.TASKS.md
